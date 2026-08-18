@@ -85,6 +85,7 @@
 
   <div class="card">
     <label for="progression">コード進行</label>
+    <div style="font-size:13px;color:#9eb0c7;margin-bottom:8px;">音色：Piano</div>
     <textarea id="progression">Cmaj7 | Am7 | Dm7 | G7</textarea>
 
     <div class="grid">
@@ -160,25 +161,62 @@ function parseChord(symbol){
 
 function midiToFreq(m){ return 440 * Math.pow(2,(m-69)/12); }
 
-function playChord(chord, start, duration){
-  const baseMidi = 60 + chord.root; // one octave higher, around C4
-  const gain = audioCtx.createGain();
-  gain.gain.setValueAtTime(0.0001,start);
-  gain.gain.exponentialRampToValueAtTime(0.18,start+0.03);
-  gain.gain.setValueAtTime(0.15,Math.max(start+0.04,start+duration-0.15));
-  gain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
-  gain.connect(audioCtx.destination);
+function playPianoNote(midi, start, duration, velocity=1){
+  const freq = midiToFreq(midi);
 
-  chord.intervals.forEach((iv,i)=>{
+  const master = audioCtx.createGain();
+  master.gain.setValueAtTime(0.0001, start);
+  master.gain.exponentialRampToValueAtTime(0.16 * velocity, start + 0.008);
+  master.gain.exponentialRampToValueAtTime(0.06 * velocity, start + 0.20);
+  master.gain.exponentialRampToValueAtTime(0.018 * velocity, start + Math.min(duration * 0.72, 1.45));
+  master.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  master.connect(audioCtx.destination);
+
+  const partials = [
+    {ratio:1.00, level:1.00},
+    {ratio:2.00, level:0.36},
+    {ratio:3.01, level:0.16},
+    {ratio:4.02, level:0.07}
+  ];
+
+  partials.forEach((p)=>{
     const osc = audioCtx.createOscillator();
-    osc.type = i===0 ? 'triangle' : 'sine';
-    osc.frequency.value = midiToFreq(baseMidi+iv);
-    osc.connect(gain);
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq * p.ratio, start);
+    g.gain.setValueAtTime(p.level, start);
+    osc.connect(g);
+    g.connect(master);
     osc.start(start);
-    osc.stop(start+duration+0.03);
-    scheduledNodes.push(osc);
+    osc.stop(start + duration + 0.04);
+    scheduledNodes.push(osc, g);
   });
-  scheduledNodes.push(gain);
+
+  // Short hammer-like transient.
+  const buffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.022), audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++){
+    data[i] = (Math.random()*2-1) * Math.pow(1 - i/data.length, 3);
+  }
+  const noise = audioCtx.createBufferSource();
+  const noiseGain = audioCtx.createGain();
+  noise.buffer = buffer;
+  noiseGain.gain.setValueAtTime(0.024 * velocity, start);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.022);
+  noise.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+  noise.start(start);
+  noise.stop(start + 0.03);
+
+  scheduledNodes.push(noise, noiseGain, master);
+}
+
+function playChord(chord, start, duration){
+  const baseMidi = 60 + chord.root; // around C4
+  chord.intervals.forEach((iv,i)=>{
+    const velocity = i === 0 ? 1.0 : 0.86;
+    playPianoNote(baseMidi + iv, start, duration * 0.96, velocity);
+  });
 }
 
 function stopAll(){
