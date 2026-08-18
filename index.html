@@ -161,7 +161,7 @@ function parseChord(symbol){
 function midiToFreq(m){ return 440 * Math.pow(2,(m-69)/12); }
 
 function playChord(chord, start, duration){
-  const baseMidi = 48 + chord.root; // around C3
+  const baseMidi = 60 + chord.root; // one octave higher, around C4
   const gain = audioCtx.createGain();
   gain.gain.setValueAtTime(0.0001,start);
   gain.gain.exponentialRampToValueAtTime(0.18,start+0.03);
