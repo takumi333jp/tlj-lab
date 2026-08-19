@@ -41,7 +41,7 @@ code{color:#f4d991}
 <div class="wrap">
   <div class="brand">THINK LIKE JAZZ</div>
   <h1>TLJ Chord Player</h1>
-  <p class="lead">Mizouのリンクから開くとコード進行が自動入力されます。音源をページ内でWAVに変換し、ブラウザ標準のオーディオプレーヤーで再生します。</p>
+  <p class="lead">Mizouのリンクから開くとコード進行が自動入力されます。スマホでは「▶ 音を準備して再生」をタップすると、その操作の中でWAV音源を作成して再生します。</p>
 
   <div class="card">
     <label for="progression">コード進行</label>
@@ -58,12 +58,13 @@ code{color:#f4d991}
       </div>
     </div>
 
-    <button class="update" id="updateBtn">音源を更新</button>
+    <button class="update" id="updateBtn">▶ 音を準備して再生</button>
 
-    <div class="status" id="status">音源を準備しています…</div>
-    <div class="note">準備完了後、下のブラウザ標準プレーヤーの「▶」を押してください。Mizouの読み上げボタンは使用しません。</div>
+    <div class="status" id="status">「▶ 音を準備して再生」を押してください。</div>
+    <div class="note">iPhone / Android向け：最初のタップそのものを音声再生のユーザー操作として使います。うまく鳴らない場合は、生成後に表示される「別画面で音源を開く」を使用してください。</div>
 
-    <audio id="player" controls preload="metadata" playsinline></audio>
+    <audio id="player" controls preload="none" playsinline></audio>
+    <a id="openAudio" href="#" target="_blank" rel="noopener" style="display:none;margin-top:12px;color:#f4d991;font-weight:700;text-decoration:none;">別画面で音源を開く</a>
 
     <div class="current" id="measures"></div>
 
@@ -198,33 +199,60 @@ function makeWavBlob(chords,bpm,beats){
   return new Blob([buffer],{type:'audio/wav'});
 }
 
-function buildAudio(){
+function buildAndPlay(){
   const status=document.getElementById('status');
   const symbols=getSymbols();
   if(!symbols.length){status.textContent='コード進行を入力してください。';return;}
+
   const chords=symbols.map(parseChord);
   const bad=chords.findIndex(x=>!x);
   if(bad>=0){status.textContent='解釈できないコードがあります: '+symbols[bad];return;}
+
   renderMeasures(symbols);
 
   const bpm=Math.max(40,Math.min(240,Number(document.getElementById('bpm').value)||90));
   const beats=Math.max(1,Math.min(8,Number(document.getElementById('beats').value)||4));
-  status.textContent='音源を生成しています…';
+  status.textContent='音源を準備しています…';
 
   try{
+    // IMPORTANT for mobile Safari/WebView:
+    // Everything from WAV creation to play() happens synchronously
+    // inside the user's tap/click handler.
     const blob=makeWavBlob(chords,bpm,beats);
+
     if(currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
     currentBlobUrl=URL.createObjectURL(blob);
+
     const player=document.getElementById('player');
+    const openAudio=document.getElementById('openAudio');
+
+    player.pause();
+    player.removeAttribute('src');
     player.src=currentBlobUrl;
-    player.load();
-    status.textContent='音源準備完了。下の「▶」を押してください。';
+    player.setAttribute('playsinline','');
+    player.preload='auto';
+
+    // Provide a second, direct-navigation fallback for embedded WebViews.
+    openAudio.href=currentBlobUrl;
+    openAudio.style.display='inline-block';
+
+    const promise=player.play();
+
+    if(promise && typeof promise.then==='function'){
+      promise.then(()=>{
+        status.textContent='再生中です。';
+      }).catch(err=>{
+        console.error(err);
+        status.textContent='この画面では自動再生できません。下の「別画面で音源を開く」をタップしてください。';
+      });
+    }else{
+      status.textContent='再生を開始しました。';
+    }
   }catch(e){
     console.error(e);
     status.textContent='音源生成に失敗しました。ページを再読み込みしてください。';
   }
 }
-
 function loadFromUrl(){
   const p=new URLSearchParams(location.search);
   const compact=p.get('c');
@@ -237,14 +265,14 @@ function loadFromUrl(){
   if(beats) document.getElementById('beats').value=beats;
 }
 
-document.getElementById('updateBtn').addEventListener('click',buildAudio);
+document.getElementById('updateBtn').addEventListener('click',buildAndPlay);
 document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
   document.getElementById('progression').value=c.dataset.p;
-  buildAudio();
+  buildAndPlay();
 }));
 
 loadFromUrl();
-buildAudio();
+renderMeasures(getSymbols());
 </script>
 </body>
 </html>
