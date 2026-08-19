@@ -73,12 +73,13 @@ code{color:#f4d991}
       <span class="chip" data-p="Cmaj7 | Am7 | Dm7 | G7">Cmaj7–Am7–Dm7–G7</span>
       <span class="chip" data-p="Dm7 | G7 | Cmaj7 | Cmaj7">Dm7–G7–Cmaj7–Cmaj7</span>
       <span class="chip" data-p="Cmaj7 | A7 | Dm7 | G7">Cmaj7–A7–Dm7–G7</span>
+      <span class="chip" data-p="Cmaj9 | A7b9 | Dm9 | G13">Cmaj9–A7b9–Dm9–G13</span>
     </div>
 
     <div class="help">
-      対応例：<code>C</code>, <code>Cmaj7</code>, <code>C7</code>, <code>Cm</code>, <code>Cm7</code>,
+      対応例：<code>C</code>, <code>Cmaj7</code>, <code>Cmaj9</code>, <code>C13</code>, <code>C7b9</code>, <code>C7#9</code>, <code>C7#11</code>, <code>Cm9</code>,
       <code>Cm7b5</code>, <code>Cø7</code>, <code>Cdim</code>, <code>Cdim7</code>, <code>Csus4</code>, <code>Cadd9</code>。<br>
-      Mizou用URL例：<code>?c=Cmaj7,A7,Dm7,G7&amp;bpm=90&amp;beats=4</code>
+      Mizou用URL例：<code>?c=Cmaj7,A7,Dm7,G7&amp;bpm=90&amp;beats=4</code><br>テンション対応：9 / b9 / #9 / 11 / #11 / 13 / b13 / add9 / 6/9 / b5 / #5 など。
     </div>
   </div>
 </div>
@@ -88,31 +89,114 @@ const noteMap={C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab
 let currentBlobUrl=null;
 
 function parseChord(symbol){
-  const display=symbol.trim();
-  const normalized=display.replace(/♭/g,'b').replace(/♯/g,'#');
-  const main=normalized.split('/')[0];
-  const m=main.match(/^([A-G])([#b]?)(.*)$/);
-  if(!m) return null;
-  const root=noteMap[m[1]+m[2]];
-  if(root===undefined) return null;
-  const q=m[3].toLowerCase().replace(/\s+/g,'');
-  let intervals=[0,4,7];
-  if(q===''||q==='maj') intervals=[0,4,7];
-  else if(q==='m'||q==='min') intervals=[0,3,7];
-  else if(q.includes('maj7')||q.includes('ma7')||q==='m7+') intervals=[0,4,7,11];
-  else if(q==='7') intervals=[0,4,7,10];
-  else if(q==='m7'||q==='min7') intervals=[0,3,7,10];
-  else if(q.includes('m7b5')||q.includes('ø')) intervals=[0,3,6,10];
-  else if(q.includes('dim7')) intervals=[0,3,6,9];
-  else if(q.includes('dim')||q.includes('°')) intervals=[0,3,6];
-  else if(q.includes('sus4')) intervals=[0,5,7];
-  else if(q.includes('sus2')) intervals=[0,2,7];
-  else if(q.includes('add9')) intervals=[0,4,7,14];
-  else if(q.includes('6')&&q.startsWith('m')) intervals=[0,3,7,9];
-  else if(q.includes('6')) intervals=[0,4,7,9];
-  return {root,intervals,symbol:display};
-}
+  const display = symbol.trim();
+  const normalized = display
+    .replace(/♭/g,'b')
+    .replace(/♯/g,'#')
+    .replace(/Δ/g,'maj')
+    .replace(/−/g,'-');
 
+  const main = normalized.split('/')[0];
+  const m = main.match(/^([A-G])([#b]?)(.*)$/);
+  if(!m) return null;
+
+  const root = noteMap[m[1] + m[2]];
+  if(root === undefined) return null;
+
+  let q = m[3].toLowerCase().replace(/\s+/g,'');
+  q = q.replace(/^min/,'m').replace(/^minor/,'m').replace(/^major/,'maj');
+
+  // Chord structure is built in chord-scale order.
+  // Root-position voicing is intentional so every written extension is audible.
+  let intervals = [0,4,7];
+
+  const isHalfDim = q.includes('m7b5') || q.includes('ø');
+  const isDim7 = q.includes('dim7') || q.includes('°7');
+  const isDim = !isDim7 && (q.includes('dim') || q.includes('°'));
+  const isMinor = q.startsWith('m') && !q.startsWith('maj') && !isHalfDim;
+  const isMaj7 = q.includes('maj7') || q.includes('maj9') || q.includes('maj11') || q.includes('maj13');
+  const hasDom7 = /(^|[^a-z])7/.test(q) || q.startsWith('7') ||
+                  q.includes('9') || q.includes('11') || q.includes('13');
+
+  // Base triad / seventh
+  if(isHalfDim) intervals = [0,3,6,10];
+  else if(isDim7) intervals = [0,3,6,9];
+  else if(isDim) intervals = [0,3,6];
+  else if(q.includes('sus2')) intervals = [0,2,7];
+  else if(q.includes('sus4') || q === 'sus') intervals = [0,5,7];
+  else if(isMinor) intervals = [0,3,7];
+  else intervals = [0,4,7];
+
+  if(!isHalfDim && !isDim7 && !isDim){
+    if(isMaj7){
+      if(!intervals.includes(11)) intervals.push(11);
+    }else if(q.includes('mmaj7') || q.includes('m(maj7)')){
+      intervals = [0,3,7,11];
+    }else if(hasDom7 || q === '7' || q.startsWith('7')){
+      if(!intervals.includes(10)) intervals.push(10);
+    }
+  }
+
+  // Altered fifths
+  if(q.includes('b5')){
+    intervals = intervals.filter(x => x !== 7);
+    if(!intervals.includes(6)) intervals.push(6);
+  }
+  if(q.includes('#5') || q.includes('+5') || q.includes('aug')){
+    intervals = intervals.filter(x => x !== 7);
+    if(!intervals.includes(8)) intervals.push(8);
+  }
+
+  // Sixth chords
+  if((q === '6' || q.startsWith('6/') || q.includes('6/9')) && !intervals.includes(9)){
+    intervals.push(9);
+  }
+  if(isMinor && (q === 'm6' || q.includes('m6/9')) && !intervals.includes(9)){
+    intervals.push(9);
+  }
+
+  // Ninths
+  if(q.includes('b9') && !intervals.includes(13)) intervals.push(13);
+  if(q.includes('#9') && !intervals.includes(15)) intervals.push(15);
+
+  const hasNatural9 =
+    q.includes('add9') ||
+    q.includes('6/9') ||
+    /(^|[^#b])9/.test(q) ||
+    q.includes('maj9') || q.includes('m9') ||
+    q.includes('11') || q.includes('13');
+
+  if(hasNatural9 && !q.includes('b9') && !q.includes('#9') && !intervals.includes(14)){
+    intervals.push(14);
+  }
+
+  // Elevenths
+  if(q.includes('#11') && !intervals.includes(18)) intervals.push(18);
+  const hasNatural11 = (q.includes('11') || q.includes('add11')) && !q.includes('#11');
+  if(hasNatural11 && !intervals.includes(17)) intervals.push(17);
+
+  // Thirteenths
+  if(q.includes('b13') && !intervals.includes(20)) intervals.push(20);
+  const hasNatural13 = q.includes('13') && !q.includes('b13');
+  if(hasNatural13 && !intervals.includes(21)) intervals.push(21);
+
+  // Added tones
+  if(q.includes('add2') && !intervals.includes(2)) intervals.push(2);
+  if(q.includes('add4') && !intervals.includes(5)) intervals.push(5);
+  if(q.includes('add6') && !intervals.includes(9)) intervals.push(9);
+
+  // Common omissions
+  if(q.includes('no3') || q.includes('omit3')){
+    intervals = intervals.filter(x => x !== 3 && x !== 4 && x !== 5);
+  }
+  if(q.includes('no5') || q.includes('omit5')){
+    intervals = intervals.filter(x => x !== 6 && x !== 7 && x !== 8);
+  }
+
+  intervals = [...new Set(intervals)].sort((a,b)=>a-b);
+
+  return {root, intervals, symbol:display};
+}
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12)}
 
 function getSymbols(){
@@ -169,7 +253,7 @@ function makeWavBlob(chords,bpm,beats){
   chords.forEach((ch,i)=>{
     const start=i*chordDur;
     const base=60+ch.root; // C4 area
-    ch.intervals.forEach((iv,j)=>addNote(base+iv,start,chordDur*0.96,j===0?0.85:0.70));
+    ch.intervals.forEach((iv,j)=>addNote(base+iv,start,chordDur*0.96,j===0?0.78:0.56));
   });
 
   let max=0;
