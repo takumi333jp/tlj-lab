@@ -111,6 +111,7 @@
 
     <div class="status" id="status"></div>
     <div id="loadedNote" style="font-size:13px;color:#9eb0c7;min-height:20px;"></div>
+    <div style="font-size:12px;color:#7589a3;margin-top:4px;">初回の▶再生タップで音声を有効化して、そのまま再生します。</div>
     <div class="current" id="measures"></div>
 
     <div class="examples">
@@ -132,6 +133,7 @@
 let audioCtx = null;
 let scheduledNodes = [];
 let timers = [];
+let audioUnlocked = false;
 
 const noteMap = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
 
@@ -249,6 +251,38 @@ function renderMeasures(symbols){
   });
 }
 
+function ensureAudioContext(){
+  if(!audioCtx || audioCtx.state === 'closed'){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return null;
+    audioCtx = new Ctx();
+  }
+  return audioCtx;
+}
+
+function unlockAudio(){
+  const ctx = ensureAudioContext();
+  if(!ctx) return;
+
+  try{
+    if(ctx.state === 'suspended') ctx.resume();
+
+    // Prime audio during the user's first pointer/touch gesture.
+    // This helps in-app browsers/WebViews that keep Web Audio suspended
+    // until a direct media gesture has occurred.
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.00001, ctx.currentTime);
+    osc.frequency.setValueAtTime(440, ctx.currentTime);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.02);
+    audioUnlocked = true;
+    setTimeout(()=>{ try{osc.disconnect();g.disconnect();}catch(e){} }, 80);
+  }catch(e){}
+}
+
 async function play(){
   stopAll();
   const symbols=getSymbols();
@@ -260,8 +294,21 @@ async function play(){
     return;
   }
   renderMeasures(symbols);
-  audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
-  await audioCtx.resume();
+  audioCtx = ensureAudioContext();
+  if(!audioCtx){
+    document.getElementById('status').textContent='このブラウザでは音声再生に対応していません';
+    return;
+  }
+  try{
+    if(audioCtx.state !== 'running') await audioCtx.resume();
+  }catch(e){
+    document.getElementById('status').textContent='音声を有効にできませんでした。もう一度▶再生を押してください';
+    return;
+  }
+  if(audioCtx.state !== 'running'){
+    document.getElementById('status').textContent='音声が停止中です。もう一度▶再生を押してください';
+    return;
+  }
   const bpm=Math.max(40,Math.min(240,Number(document.getElementById('bpm').value)||90));
   const beats=Math.max(1,Math.min(8,Number(document.getElementById('beats').value)||4));
   const dur=(60/bpm)*beats;
@@ -282,7 +329,10 @@ async function play(){
   }, (0.1+chords.length*dur)*1000));
 }
 
-document.getElementById('playBtn').addEventListener('click',play);
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('pointerdown', unlockAudio, {passive:true});
+playBtn.addEventListener('touchstart', unlockAudio, {passive:true});
+playBtn.addEventListener('click',play);
 document.getElementById('stopBtn').addEventListener('click',stopAll);
 document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
   document.getElementById('progression').value=c.dataset.p;
