@@ -79,7 +79,7 @@ code{color:#f4d991}
     <div class="help">
       対応例：<code>C</code>, <code>Cmaj7</code>, <code>Cmaj9</code>, <code>C13</code>, <code>C7b9</code>, <code>C7#9</code>, <code>C7#11</code>, <code>Cm9</code>,
       <code>Cm7b5</code>, <code>Cø7</code>, <code>Cdim</code>, <code>Cdim7</code>, <code>Csus4</code>, <code>Cadd9</code>。<br>
-      Mizou用URL例：<code>?c=Cmaj7,A7,Dm7,G7&amp;bpm=90&amp;beats=4</code><br>テンション対応：9 / b9 / #9 / 11 / #11 / 13 / b13 / add9 / 6/9 / b5 / #5 など。
+      Mizou用URL例：<code>?c=Cmaj7,A7,Dm7,G7&amp;bpm=90&amp;beats=4</code><br>テンション対応：9 / b9 / #9 / 11 / #11 / 13 / b13 / add9 / 6/9 / b5 / #5 など。<br>高いテンションは実用的な音域へオクターブ移動し、トップノートが極端に高くならないJazz Voicingで再生します。
     </div>
   </div>
 </div>
@@ -219,6 +219,29 @@ function writeString(view, offset, string){
   for(let i=0;i<string.length;i++) view.setUint8(offset+i,string.charCodeAt(i));
 }
 
+
+function makeJazzVoicing(chord){
+  // Keep the chord in a practical listening register.
+  // Written extensions (9, 11, 13) are octave-displaced instead of being
+  // stacked mechanically above the root.
+  const base = 60 + chord.root;   // Root around C4
+  const topLimit = 76;            // E5: avoid shrill A5/E6-type top notes
+  const bottomLimit = 53;         // F3: keep the voicing from dropping too low
+
+  let notes = chord.intervals.map(iv => base + iv);
+
+  notes = notes.map(midi => {
+    while(midi > topLimit) midi -= 12;
+    while(midi < bottomLimit) midi += 12;
+    return midi;
+  });
+
+  // Remove duplicate pitch classes that may occur after octave displacement.
+  notes = [...new Set(notes)].sort((a,b)=>a-b);
+
+  return notes;
+}
+
 function makeWavBlob(chords,bpm,beats){
   const sampleRate=22050;
   const chordDur=(60/bpm)*beats;
@@ -252,8 +275,12 @@ function makeWavBlob(chords,bpm,beats){
 
   chords.forEach((ch,i)=>{
     const start=i*chordDur;
-    const base=60+ch.root; // C4 area
-    ch.intervals.forEach((iv,j)=>addNote(base+iv,start,chordDur*0.96,j===0?0.78:0.56));
+    const notes=makeJazzVoicing(ch);
+
+    notes.forEach((midi,j)=>{
+      // Slightly emphasize the lowest note, keep upper tensions softer.
+      addNote(midi,start,chordDur*0.96,j===0?0.74:0.52);
+    });
   });
 
   let max=0;
