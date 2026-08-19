@@ -1,91 +1,50 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TLJ Chord Player</title>
 <style>
-  :root{
-    --bg:#07111f;
-    --panel:#0e1c2f;
-    --text:#f4f7fb;
-    --muted:#9eb0c7;
-    --gold:#d8b35e;
-    --line:#1d324b;
-    --accent:#2a7fff;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;
-    background:linear-gradient(180deg,#07111f 0%,#0a1626 100%);
-    color:var(--text);
-    min-height:100vh;
-  }
-  .wrap{max-width:760px;margin:0 auto;padding:28px 18px 48px}
-  .brand{font-size:13px;letter-spacing:.14em;color:var(--gold);font-weight:700}
-  h1{font-size:30px;margin:8px 0 8px}
-  .lead{color:var(--muted);line-height:1.65;margin-bottom:22px}
-  .card{
-    background:rgba(14,28,47,.94);
-    border:1px solid var(--line);
-    border-radius:18px;
-    padding:18px;
-    box-shadow:0 18px 50px rgba(0,0,0,.25);
-  }
-  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 7px}
-  textarea,input{
-    width:100%;
-    background:#091524;
-    color:var(--text);
-    border:1px solid #29415f;
-    border-radius:12px;
-    padding:13px 14px;
-    font-size:16px;
-    outline:none;
-  }
-  textarea{min-height:96px;resize:vertical;line-height:1.5}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-  button{
-    border:0;border-radius:12px;padding:14px 16px;font-size:16px;font-weight:700;cursor:pointer
-  }
-  .play{background:var(--gold);color:#08111e}
-  .stop{background:#1c2c42;color:var(--text);border:1px solid #334962}
-  .examples{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
-  .chip{
-    display:inline-block;margin:5px 5px 0 0;padding:8px 10px;border:1px solid #34506e;
-    border-radius:999px;color:#dfe8f4;font-size:13px;cursor:pointer;background:#0a1727
-  }
-  .status{margin-top:15px;color:var(--gold);min-height:24px;font-weight:700}
-  .current{
-    margin-top:12px;
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px;
-  }
-  .measure{
-    border:1px solid #31465f;border-radius:10px;padding:12px 6px;text-align:center;color:var(--muted);
-    min-height:46px;display:flex;align-items:center;justify-content:center
-  }
-  .measure.active{border-color:var(--gold);color:var(--text);background:rgba(216,179,94,.10)}
-  .help{font-size:13px;color:var(--muted);line-height:1.65;margin-top:16px}
-  code{color:#f4d991}
-  @media(max-width:540px){
-    .grid,.buttons{grid-template-columns:1fr}
-    .current{grid-template-columns:1fr 1fr}
-  }
+:root{
+  --bg:#07111f; --panel:#0e1c2f; --text:#f4f7fb; --muted:#9eb0c7;
+  --gold:#d8b35e; --line:#1d324b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;
+  background:linear-gradient(180deg,#07111f 0%,#0a1626 100%);color:var(--text);min-height:100vh
+}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 48px}
+.brand{font-size:13px;letter-spacing:.14em;color:var(--gold);font-weight:700}
+h1{font-size:30px;margin:8px 0}
+.lead{color:var(--muted);line-height:1.65;margin-bottom:22px}
+.card{background:rgba(14,28,47,.94);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 7px}
+textarea,input{width:100%;background:#091524;color:var(--text);border:1px solid #29415f;border-radius:12px;padding:13px 14px;font-size:16px;outline:none}
+textarea{min-height:96px;resize:vertical;line-height:1.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{width:100%;border:0;border-radius:12px;padding:14px 16px;font-size:16px;font-weight:700;cursor:pointer;margin-top:14px}
+.update{background:var(--gold);color:#08111e}
+audio{width:100%;margin-top:14px}
+.status{margin-top:14px;color:var(--gold);min-height:24px;font-weight:700}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:8px}
+.current{margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.measure{border:1px solid #31465f;border-radius:10px;padding:12px 6px;text-align:center;color:var(--muted);min-height:46px;display:flex;align-items:center;justify-content:center}
+.examples{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.chip{display:inline-block;margin:5px 5px 0 0;padding:8px 10px;border:1px solid #34506e;border-radius:999px;color:#dfe8f4;font-size:13px;cursor:pointer;background:#0a1727}
+.help{font-size:13px;color:var(--muted);line-height:1.65;margin-top:16px}
+code{color:#f4d991}
+@media(max-width:540px){.grid{grid-template-columns:1fr}.current{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">THINK LIKE JAZZ</div>
   <h1>TLJ Chord Player</h1>
-  <p class="lead">TLJ Composition Tutorから開くと、コード進行が自動入力されます。あとは「▶ 再生」を押すだけで音を確認できます。</p>
+  <p class="lead">Mizouのリンクから開くとコード進行が自動入力されます。音源をページ内でWAVに変換し、ブラウザ標準のオーディオプレーヤーで再生します。</p>
 
   <div class="card">
     <label for="progression">コード進行</label>
-    <div style="font-size:13px;color:#9eb0c7;margin-bottom:8px;">音色：Piano</div>
     <textarea id="progression">Cmaj7 | Am7 | Dm7 | G7</textarea>
 
     <div class="grid">
@@ -99,307 +58,193 @@
       </div>
     </div>
 
-    <div class="buttons">
-      <button class="play" id="playBtn">▶ 再生</button>
-      <button class="stop" id="stopBtn">■ 停止</button>
-    </div>
+    <button class="update" id="updateBtn">音源を更新</button>
 
-    <div class="buttons">
-      <button class="stop" id="shareBtn">リンクをコピー</button>
-      <button class="stop" id="resetBtn">初期化</button>
-    </div>
+    <div class="status" id="status">音源を準備しています…</div>
+    <div class="note">準備完了後、下のブラウザ標準プレーヤーの「▶」を押してください。Mizouの読み上げボタンは使用しません。</div>
 
-    <div class="status" id="status"></div>
-    <div id="loadedNote" style="font-size:13px;color:#9eb0c7;min-height:20px;"></div>
-    <div style="font-size:12px;color:#7589a3;margin-top:4px;">初回の▶再生タップで音声を有効化して、そのまま再生します。</div>
+    <audio id="player" controls preload="metadata" playsinline></audio>
+
     <div class="current" id="measures"></div>
 
     <div class="examples">
       <strong>サンプル</strong><br>
       <span class="chip" data-p="Cmaj7 | Am7 | Dm7 | G7">Cmaj7–Am7–Dm7–G7</span>
       <span class="chip" data-p="Dm7 | G7 | Cmaj7 | Cmaj7">Dm7–G7–Cmaj7–Cmaj7</span>
-      <span class="chip" data-p="Am7 | Dm7 | G7 | Cmaj7">Am7–Dm7–G7–Cmaj7</span>
       <span class="chip" data-p="Cmaj7 | A7 | Dm7 | G7">Cmaj7–A7–Dm7–G7</span>
     </div>
 
     <div class="help">
-      対応例：<code>C</code>, <code>Cmaj7</code>, <code>C7</code>, <code>Cm</code>, <code>Cm7</code>, <code>Cm7b5</code>, <code>Cø7</code>, <code>Cdim</code>, <code>Cdim7</code>, <code>Csus4</code>, <code>Cadd9</code>。<br>
-      区切りは <code>|</code> または空白でも使用できます。<br>\n      Mizou用URL例：<code>?c=Cmaj7,Am7,Dm7,G7&amp;bpm=90&amp;beats=4</code>
+      対応例：<code>C</code>, <code>Cmaj7</code>, <code>C7</code>, <code>Cm</code>, <code>Cm7</code>,
+      <code>Cm7b5</code>, <code>Cø7</code>, <code>Cdim</code>, <code>Cdim7</code>, <code>Csus4</code>, <code>Cadd9</code>。<br>
+      Mizou用URL例：<code>?c=Cmaj7,A7,Dm7,G7&amp;bpm=90&amp;beats=4</code>
     </div>
   </div>
 </div>
 
 <script>
-let audioCtx = null;
-let scheduledNodes = [];
-let timers = [];
-let audioUnlocked = false;
-
-const noteMap = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+const noteMap={C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+let currentBlobUrl=null;
 
 function parseChord(symbol){
-  const displaySymbol = symbol.trim();
-  symbol = displaySymbol.replace(/♭/g,'b').replace(/♯/g,'#');
-  const mainSymbol = symbol.split('/')[0];
-  const m = mainSymbol.match(/^([A-G])([#b]?)(.*)$/);
+  const display=symbol.trim();
+  const normalized=display.replace(/♭/g,'b').replace(/♯/g,'#');
+  const main=normalized.split('/')[0];
+  const m=main.match(/^([A-G])([#b]?)(.*)$/);
   if(!m) return null;
-  const rootName = m[1]+m[2];
-  const root = noteMap[rootName];
-  if(root === undefined) return null;
-  let q = m[3].toLowerCase().replace(/\s+/g,'');
-  let intervals = [0,4,7]; // major
-  if(q === '' || q === 'maj') intervals=[0,4,7];
-  else if(q === 'm' || q === 'min') intervals=[0,3,7];
-  else if(q.includes('maj7') || q.includes('ma7') || q === 'm7+' ) intervals=[0,4,7,11];
-  else if(q === '7') intervals=[0,4,7,10];
-  else if(q === 'm7' || q === 'min7') intervals=[0,3,7,10];
-  else if(q.includes('m7b5') || q.includes('ø')) intervals=[0,3,6,10];
+  const root=noteMap[m[1]+m[2]];
+  if(root===undefined) return null;
+  const q=m[3].toLowerCase().replace(/\s+/g,'');
+  let intervals=[0,4,7];
+  if(q===''||q==='maj') intervals=[0,4,7];
+  else if(q==='m'||q==='min') intervals=[0,3,7];
+  else if(q.includes('maj7')||q.includes('ma7')||q==='m7+') intervals=[0,4,7,11];
+  else if(q==='7') intervals=[0,4,7,10];
+  else if(q==='m7'||q==='min7') intervals=[0,3,7,10];
+  else if(q.includes('m7b5')||q.includes('ø')) intervals=[0,3,6,10];
   else if(q.includes('dim7')) intervals=[0,3,6,9];
-  else if(q.includes('dim') || q.includes('°')) intervals=[0,3,6];
+  else if(q.includes('dim')||q.includes('°')) intervals=[0,3,6];
   else if(q.includes('sus4')) intervals=[0,5,7];
   else if(q.includes('sus2')) intervals=[0,2,7];
   else if(q.includes('add9')) intervals=[0,4,7,14];
-  else if(q.includes('6') && q.startsWith('m')) intervals=[0,3,7,9];
+  else if(q.includes('6')&&q.startsWith('m')) intervals=[0,3,7,9];
   else if(q.includes('6')) intervals=[0,4,7,9];
-  return {root, intervals, symbol: displaySymbol};
+  return {root,intervals,symbol:display};
 }
 
-function midiToFreq(m){ return 440 * Math.pow(2,(m-69)/12); }
-
-function playPianoNote(midi, start, duration, velocity=1){
-  const freq = midiToFreq(midi);
-
-  const master = audioCtx.createGain();
-  master.gain.setValueAtTime(0.0001, start);
-  master.gain.exponentialRampToValueAtTime(0.16 * velocity, start + 0.008);
-  master.gain.exponentialRampToValueAtTime(0.06 * velocity, start + 0.20);
-  master.gain.exponentialRampToValueAtTime(0.018 * velocity, start + Math.min(duration * 0.72, 1.45));
-  master.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-  master.connect(audioCtx.destination);
-
-  const partials = [
-    {ratio:1.00, level:1.00},
-    {ratio:2.00, level:0.36},
-    {ratio:3.01, level:0.16},
-    {ratio:4.02, level:0.07}
-  ];
-
-  partials.forEach((p)=>{
-    const osc = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq * p.ratio, start);
-    g.gain.setValueAtTime(p.level, start);
-    osc.connect(g);
-    g.connect(master);
-    osc.start(start);
-    osc.stop(start + duration + 0.04);
-    scheduledNodes.push(osc, g);
-  });
-
-  // Short hammer-like transient.
-  const buffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.022), audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for(let i=0;i<data.length;i++){
-    data[i] = (Math.random()*2-1) * Math.pow(1 - i/data.length, 3);
-  }
-  const noise = audioCtx.createBufferSource();
-  const noiseGain = audioCtx.createGain();
-  noise.buffer = buffer;
-  noiseGain.gain.setValueAtTime(0.024 * velocity, start);
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.022);
-  noise.connect(noiseGain);
-  noiseGain.connect(audioCtx.destination);
-  noise.start(start);
-  noise.stop(start + 0.03);
-
-  scheduledNodes.push(noise, noiseGain, master);
-}
-
-function playChord(chord, start, duration){
-  const baseMidi = 60 + chord.root; // around C4
-  chord.intervals.forEach((iv,i)=>{
-    const velocity = i === 0 ? 1.0 : 0.86;
-    playPianoNote(baseMidi + iv, start, duration * 0.96, velocity);
-  });
-}
-
-function stopAll(){
-  timers.forEach(clearTimeout); timers=[];
-  scheduledNodes.forEach(n=>{try{ if(n.stop) n.stop(); }catch(e){} try{n.disconnect();}catch(e){}});
-  scheduledNodes=[];
-  document.querySelectorAll('.measure').forEach(el=>el.classList.remove('active'));
-  document.getElementById('status').textContent='';
-}
+function midiToFreq(m){return 440*Math.pow(2,(m-69)/12)}
 
 function getSymbols(){
-  const raw = document.getElementById('progression').value.trim();
+  const raw=document.getElementById('progression').value.trim();
   if(!raw) return [];
-  let parts = raw.includes('|') ? raw.split('|') : raw.split(/\s+/);
+  const parts=raw.includes('|')?raw.split('|'):raw.split(/\s+/);
   return parts.map(x=>x.trim()).filter(Boolean);
 }
 
 function renderMeasures(symbols){
   const box=document.getElementById('measures');
   box.innerHTML='';
-  symbols.forEach((s,i)=>{
+  symbols.forEach(s=>{
     const d=document.createElement('div');
-    d.className='measure';
-    d.id='m'+i;
-    d.textContent=s;
-    box.appendChild(d);
+    d.className='measure'; d.textContent=s; box.appendChild(d);
   });
 }
 
-function ensureAudioContext(){
-  if(!audioCtx || audioCtx.state === 'closed'){
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if(!Ctx) return null;
-    audioCtx = new Ctx();
+function writeString(view, offset, string){
+  for(let i=0;i<string.length;i++) view.setUint8(offset+i,string.charCodeAt(i));
+}
+
+function makeWavBlob(chords,bpm,beats){
+  const sampleRate=22050;
+  const chordDur=(60/bpm)*beats;
+  const tail=0.08;
+  const totalDur=chords.length*chordDur + tail;
+  const count=Math.ceil(totalDur*sampleRate);
+  const samples=new Float32Array(count);
+
+  function addNote(midi,startSec,durSec,velocity){
+    const start=Math.floor(startSec*sampleRate);
+    const end=Math.min(count,Math.floor((startSec+durSec)*sampleRate));
+    const f=midiToFreq(midi);
+    for(let n=start;n<end;n++){
+      const t=(n-start)/sampleRate;
+      const rel=t/durSec;
+      const attack=Math.min(1,t/0.008);
+      const decay=Math.exp(-2.25*t);
+      const sustain=0.12*Math.exp(-0.35*t);
+      const release=rel>0.88?Math.max(0,(1-rel)/0.12):1;
+      const env=attack*(0.88*decay+sustain)*release;
+      const phase=2*Math.PI*f*t;
+      const tone=
+        Math.sin(phase)
+        +0.34*Math.sin(2*phase)
+        +0.13*Math.sin(3.01*phase)
+        +0.055*Math.sin(4.02*phase);
+      const hammer=t<0.018 ? (Math.sin(2*Math.PI*(f*6.3)*t)*Math.exp(-150*t)*0.10) : 0;
+      samples[n]+=velocity*env*(tone*0.34+hammer);
+    }
   }
-  return audioCtx;
+
+  chords.forEach((ch,i)=>{
+    const start=i*chordDur;
+    const base=60+ch.root; // C4 area
+    ch.intervals.forEach((iv,j)=>addNote(base+iv,start,chordDur*0.96,j===0?0.85:0.70));
+  });
+
+  let max=0;
+  for(let i=0;i<samples.length;i++) max=Math.max(max,Math.abs(samples[i]));
+  const norm=max>0?0.88/max:1;
+
+  const buffer=new ArrayBuffer(44+samples.length*2);
+  const view=new DataView(buffer);
+  writeString(view,0,'RIFF');
+  view.setUint32(4,36+samples.length*2,true);
+  writeString(view,8,'WAVE');
+  writeString(view,12,'fmt ');
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*2,true);
+  view.setUint16(32,2,true);
+  view.setUint16(34,16,true);
+  writeString(view,36,'data');
+  view.setUint32(40,samples.length*2,true);
+  let off=44;
+  for(let i=0;i<samples.length;i++,off+=2){
+    const s=Math.max(-1,Math.min(1,samples[i]*norm));
+    view.setInt16(off,s<0?s*0x8000:s*0x7fff,true);
+  }
+  return new Blob([buffer],{type:'audio/wav'});
 }
 
-function unlockAudio(){
-  const ctx = ensureAudioContext();
-  if(!ctx) return;
-
-  try{
-    if(ctx.state === 'suspended') ctx.resume();
-
-    // Prime audio during the user's first pointer/touch gesture.
-    // This helps in-app browsers/WebViews that keep Web Audio suspended
-    // until a direct media gesture has occurred.
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.00001, ctx.currentTime);
-    osc.frequency.setValueAtTime(440, ctx.currentTime);
-    osc.connect(g);
-    g.connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.02);
-    audioUnlocked = true;
-    setTimeout(()=>{ try{osc.disconnect();g.disconnect();}catch(e){} }, 80);
-  }catch(e){}
-}
-
-async function play(){
-  stopAll();
+function buildAudio(){
+  const status=document.getElementById('status');
   const symbols=getSymbols();
-  if(!symbols.length) return;
+  if(!symbols.length){status.textContent='コード進行を入力してください。';return;}
   const chords=symbols.map(parseChord);
   const bad=chords.findIndex(x=>!x);
-  if(bad>=0){
-    document.getElementById('status').textContent='解釈できないコードがあります: '+symbols[bad];
-    return;
-  }
+  if(bad>=0){status.textContent='解釈できないコードがあります: '+symbols[bad];return;}
   renderMeasures(symbols);
-  audioCtx = ensureAudioContext();
-  if(!audioCtx){
-    document.getElementById('status').textContent='このブラウザでは音声再生に対応していません';
-    return;
-  }
-  try{
-    if(audioCtx.state !== 'running') await audioCtx.resume();
-  }catch(e){
-    document.getElementById('status').textContent='音声を有効にできませんでした。もう一度▶再生を押してください';
-    return;
-  }
-  if(audioCtx.state !== 'running'){
-    document.getElementById('status').textContent='音声が停止中です。もう一度▶再生を押してください';
-    return;
-  }
+
   const bpm=Math.max(40,Math.min(240,Number(document.getElementById('bpm').value)||90));
   const beats=Math.max(1,Math.min(8,Number(document.getElementById('beats').value)||4));
-  const dur=(60/bpm)*beats;
-  const now=audioCtx.currentTime+0.08;
-  document.getElementById('status').textContent='再生中';
-  chords.forEach((ch,i)=>{
-    playChord(ch, now+i*dur, dur*0.96);
-    const t=setTimeout(()=>{
-      document.querySelectorAll('.measure').forEach(el=>el.classList.remove('active'));
-      const el=document.getElementById('m'+i);
-      if(el) el.classList.add('active');
-    }, (0.08+i*dur)*1000);
-    timers.push(t);
-  });
-  timers.push(setTimeout(()=>{
-    document.querySelectorAll('.measure').forEach(el=>el.classList.remove('active'));
-    document.getElementById('status').textContent='再生完了';
-  }, (0.1+chords.length*dur)*1000));
-}
+  status.textContent='音源を生成しています…';
 
-const playBtn = document.getElementById('playBtn');
-playBtn.addEventListener('pointerdown', unlockAudio, {passive:true});
-playBtn.addEventListener('touchstart', unlockAudio, {passive:true});
-playBtn.addEventListener('click',play);
-document.getElementById('stopBtn').addEventListener('click',stopAll);
-document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
-  document.getElementById('progression').value=c.dataset.p;
-  renderMeasures(getSymbols());
-}));
-renderMeasures(getSymbols());
-
-function normalizeCompactChords(value){
-  if(!value) return '';
-  return value.split(',').map(s => s.trim()).filter(Boolean).join(' | ');
-}
-
-function compactChordsFromInput(value){
-  return value.split('|').map(s => s.trim()).filter(Boolean).join(',');
+  try{
+    const blob=makeWavBlob(chords,bpm,beats);
+    if(currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+    currentBlobUrl=URL.createObjectURL(blob);
+    const player=document.getElementById('player');
+    player.src=currentBlobUrl;
+    player.load();
+    status.textContent='音源準備完了。下の「▶」を押してください。';
+  }catch(e){
+    console.error(e);
+    status.textContent='音源生成に失敗しました。ページを再読み込みしてください。';
+  }
 }
 
 function loadFromUrl(){
-  const p = new URLSearchParams(location.search);
-  const compact = p.get('c');
-  const legacy = p.get('chords');
-  const bpm = p.get('bpm');
-  const beats = p.get('beats');
-
-  if(compact){
-    document.getElementById('progression').value = normalizeCompactChords(compact);
-    document.getElementById('loadedNote').textContent = 'Mizouからコード進行を読み込みました。▶ 再生を押してください。';
-  }else if(legacy){
-    document.getElementById('progression').value = legacy;
-    document.getElementById('loadedNote').textContent = 'コード進行を読み込みました。▶ 再生を押してください。';
-  }
-
-  if(bpm) document.getElementById('bpm').value = bpm;
-  if(beats) document.getElementById('beats').value = beats;
-  renderMeasures(getSymbols());
+  const p=new URLSearchParams(location.search);
+  const compact=p.get('c');
+  const legacy=p.get('chords');
+  const bpm=p.get('bpm');
+  const beats=p.get('beats');
+  if(compact) document.getElementById('progression').value=compact.split(',').map(s=>s.trim()).filter(Boolean).join(' | ');
+  else if(legacy) document.getElementById('progression').value=legacy;
+  if(bpm) document.getElementById('bpm').value=bpm;
+  if(beats) document.getElementById('beats').value=beats;
 }
 
-function makeShareUrl(){
-  const u = new URL(location.href);
-  u.search = '';
-  u.searchParams.set('c', compactChordsFromInput(document.getElementById('progression').value.trim()));
-  u.searchParams.set('bpm', document.getElementById('bpm').value || '90');
-  u.searchParams.set('beats', document.getElementById('beats').value || '4');
-  return u.toString();
-}
-
-document.getElementById('shareBtn').addEventListener('click', async ()=>{
-  const url = makeShareUrl();
-  try{
-    await navigator.clipboard.writeText(url);
-    document.getElementById('status').textContent='再生リンクをコピーしました';
-  }catch(e){
-    prompt('このリンクをコピーしてください', url);
-  }
-});
-
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  document.getElementById('progression').value='Cmaj7 | Am7 | Dm7 | G7';
-  document.getElementById('bpm').value='90';
-  document.getElementById('beats').value='4';
-  history.replaceState(null,'',location.pathname);
-  document.getElementById('loadedNote').textContent='';
-  renderMeasures(getSymbols());
-  stopAll();
-});
+document.getElementById('updateBtn').addEventListener('click',buildAudio);
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+  document.getElementById('progression').value=c.dataset.p;
+  buildAudio();
+}));
 
 loadFromUrl();
-
+buildAudio();
 </script>
 </body>
 </html>
