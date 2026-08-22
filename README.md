@@ -1,1 +1,1 @@
-# tlj-chord-player
+# Think Like Jazz Chord Lab
