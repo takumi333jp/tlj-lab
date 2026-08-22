@@ -1,48 +1,162 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TLJ Visual Chord Lab</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TLJ Visual Chord Lab v4</title>
 <style>
 :root{--bg:#07111f;--panel:#0e1c2f;--text:#f5f7fb;--muted:#9eb0c7;--gold:#d8b35e;--blue:#66a9ff;--line:#29415f;--tone:#dce8f7}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;background:linear-gradient(180deg,#07111f,#0a1626)}
-.wrap{max-width:1080px;margin:0 auto;padding:24px 16px 44px}.brand{font-size:12px;letter-spacing:.16em;color:var(--gold);font-weight:800}h1{margin:6px 0;font-size:30px}.lead{color:var(--muted);line-height:1.65;margin:0 0 18px}
-.card{background:rgba(14,28,47,.96);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}.controls{display:grid;grid-template-columns:1fr 140px;gap:10px}input,button{border-radius:11px;padding:12px 14px;font-size:16px}input{width:100%;background:#091524;border:1px solid var(--line);color:var(--text)}button{border:0;background:var(--gold);color:#07111f;font-weight:800;cursor:pointer}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tab{width:auto;background:#0a1727;color:#dce8f7;border:1px solid #34506e;padding:9px 12px;margin:0}.tab.active{background:var(--gold);color:#07111f}.summary{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.badge{background:#091524;border:1px solid var(--line);border-radius:999px;padding:8px 11px;color:#dfe8f4;font-size:14px}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:10px}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}.root{background:var(--blue)}.tone{background:var(--tone)}.tension{background:var(--gold)}
-.section-title{font-size:19px;font-weight:800;margin:0 0 10px}.sub{color:var(--muted);font-size:13px;margin:-3px 0 10px}#score{background:#fff;border-radius:12px;overflow:auto;min-height:245px;padding:4px}.visual{width:100%;height:auto;display:block;background:#fff;border-radius:12px}.note{color:var(--muted);font-size:13px;line-height:1.6;margin-top:9px}code{color:#f2d78f}.error{color:#ffb4b4;font-weight:700;margin-top:10px;min-height:20px}@media(max-width:650px){.controls{grid-template-columns:1fr}h1{font-size:26px}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="brand">THINK LIKE JAZZ</div><h1>TLJ Visual Chord Lab</h1>
-<p class="lead">1つのコードを「五線譜・ピアノ鍵盤・ギター指板」で同時に確認する学習用テスト版です。</p>
-<div class="card">
-<div class="controls"><input id="chords" value="Cmaj7,Dm9,G13,Cmaj7"><button id="drawBtn">表示する</button></div>
-<div class="tabs" id="tabs"></div><div class="summary" id="summary"></div>
-<div class="legend"><span><span class="dot root"></span>Root</span><span><span class="dot tone"></span>Chord Tone</span><span><span class="dot tension"></span>Tension</span></div><div class="error" id="error"></div>
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(#07111f,#0a1626);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",sans-serif}
+.wrap{max-width:1080px;margin:auto;padding:24px 14px 42px}.brand{font-size:12px;letter-spacing:.16em;color:var(--gold);font-weight:800}h1{margin:6px 0;font-size:28px}.lead,.sub,.note{color:var(--muted);line-height:1.55}.lead{margin:0 0 16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}
+.controls{display:grid;grid-template-columns:1fr 140px;gap:10px}input,button{border-radius:11px;padding:12px 14px;font-size:16px}input{background:#091524;border:1px solid var(--line);color:var(--text)}button{border:0;background:var(--gold);color:#07111f;font-weight:800}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tab{background:#0a1727;color:#dce8f7;border:1px solid #34506e;padding:9px 12px}.tab.active{background:var(--gold);color:#07111f}
+.summary,.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.badge{background:#091524;border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:14px}.legend{font-size:13px;color:var(--muted)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}.r{background:var(--blue)}.c{background:var(--tone)}.t{background:var(--gold)}
+.title{font-size:19px;font-weight:800;margin-bottom:6px}.sub{font-size:13px;margin:0 0 10px}.vw{overflow-x:auto;background:#fff;border-radius:12px}svg{display:block;min-width:760px;width:100%;height:auto;background:#fff}.vt{font-size:14px;color:#dfe8f4;margin-top:10px}.err{color:#ffb4b4;font-weight:700;min-height:20px;margin-top:10px}code{color:#f2d78f}
+@media(max-width:650px){.controls{grid-template-columns:1fr}h1{font-size:25px}}
+</style></head>
+<body><div class="wrap">
+<div class="brand">THINK LIKE JAZZ</div><h1>TLJ Visual Chord Lab v4</h1>
+<p class="lead">選んだコードに合わせて、五線譜・ピアノ鍵盤・ギターの参考ボイシングを同時に更新します。</p>
+
+<div class="card"><div class="controls"><input id="chords" value="Cmaj7,Dm9,G13,Cmaj7"><button id="go">表示する</button></div>
+<div id="tabs" class="tabs"></div><div id="summary" class="summary"></div>
+<div class="legend"><span><i class="dot r"></i>Root</span><span><i class="dot c"></i>Chord Tone</span><span><i class="dot t"></i>Tension</span></div><div id="err" class="err"></div></div>
+
+<div class="card"><div class="title">🎼 五線譜</div><p class="sub">外部ライブラリを使わずSVGで描画。表示音は下のピアノ鍵盤と同じです。</p><div id="score" class="vw"></div></div>
+<div class="card"><div class="title">🎹 ピアノ鍵盤</div><p class="sub">全オクターブではなく、このコードで実際に使う参考ボイシングだけを表示します。</p><div id="keys" class="vw"></div><div id="ptext" class="vt"></div></div>
+<div class="card"><div class="title">🎸 ギター指板</div><p class="sub">Standard Tuning / 0〜12F。全構成音ではなく、自動選択した押さえられる参考ボイシングを表示します。×はミュート。</p><div id="fret" class="vw"></div><div id="gtext" class="vt"></div></div>
+<div class="card"><div class="title">Mizou用URL</div><div class="note"><code>?chords=Cmaj7,Dm9,G13,Cmaj7</code></div></div>
 </div>
-<div class="card"><div class="section-title">🎼 五線譜</div><div class="sub">実用的な音域へまとめた参考ボイシング</div><div id="score"></div></div>
-<div class="card"><div class="section-title">🎹 ピアノ鍵盤</div><div class="sub">C3〜B5。構成音を鍵盤上で確認できます。</div><div id="keyboard"></div></div>
-<div class="card"><div class="section-title">🎸 ギター指板</div><div class="sub">Standard Tuning E–A–D–G–B–E / 0〜12フレット。構成音の位置を全表示します。</div><div id="fretboard"></div></div>
-<div class="card"><div class="section-title">Mizou用URL</div><div class="note">例：<code>?chords=Cmaj7,Dm9,G13,Cmaj7</code><br>Mizouからコード進行を渡し、タブを切り替えながら学習できます。</div></div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/vexflow@5.0.0/build/cjs/vexflow.js"></script>
+
 <script>
-const noteMap={C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
-const pcSharp=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],pcFlat=["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"],pcVex=["c","c#","d","eb","e","f","f#","g","ab","a","bb","b"];
-let progression=[],selectedIndex=0;const uniqSort=a=>[...new Set(a)].sort((x,y)=>x-y);
-function parseChord(symbol){const display=symbol.trim(),s=display.replace(/♭/g,'b').replace(/♯/g,'#').replace(/Δ/g,'maj'),m=s.match(/^([A-G])([#b]?)(.*)$/);if(!m)return null;const root=noteMap[m[1]+m[2]];if(root===undefined)return null;let q=m[3].toLowerCase().replace(/\s+/g,'').replace(/^min/,'m').replace(/^minor/,'m').replace(/^major/,'maj');let chord=[0,4,7],tensions=[];const half=q.includes('m7b5')||q.includes('ø'),dim7=q.includes('dim7')||q.includes('°7'),dim=!dim7&&(q.includes('dim')||q.includes('°')),minor=q.startsWith('m')&&!q.startsWith('maj')&&!half;if(half)chord=[0,3,6,10];else if(dim7)chord=[0,3,6,9];else if(dim)chord=[0,3,6];else if(q.includes('sus2'))chord=[0,2,7];else if(q.includes('sus4')||q==='sus')chord=[0,5,7];else if(minor)chord=[0,3,7];if(!half&&!dim&&!dim7){if(q.includes('maj7')||q.includes('maj9')||q.includes('maj11')||q.includes('maj13'))chord.push(11);else if(q.includes('7')||q.includes('9')||q.includes('11')||q.includes('13'))chord.push(10)}if(q.includes('b5')){chord=chord.filter(x=>x!==7);chord.push(6)}if(q.includes('#5')||q.includes('aug')){chord=chord.filter(x=>x!==7);chord.push(8)}if(q==='6'||q.includes('6/9')||q==='m6'||q.includes('m6/9'))chord.push(9);if(q.includes('b9'))tensions.push(13);if(q.includes('#9'))tensions.push(15);const n9=(q.includes('add9')||q.includes('6/9')||q.includes('maj9')||q.includes('m9')||q==='9'||q.includes('11')||q.includes('13'))&&!q.includes('b9')&&!q.includes('#9');if(n9)tensions.push(14);if(q.includes('#11'))tensions.push(18);else if(q.includes('11')||q.includes('add11'))tensions.push(17);if(q.includes('b13'))tensions.push(20);else if(q.includes('13'))tensions.push(21);chord=uniqSort(chord);tensions=uniqSort(tensions);return{symbol:display,root,chord,tensions,all:uniqSort([...chord,...tensions]),preferFlats:s.includes('b')}}
-const pitchClass=(r,i)=>(r+i)%12,noteName=(pc,f)=>(f?pcFlat:pcSharp)[pc];function intervalLabel(iv){const map={0:'R',3:'b3',4:'3',6:'b5',7:'5',8:'#5',9:'6',10:'b7',11:'7',13:'b9',14:'9',15:'#9',17:'11',18:'#11',20:'b13',21:'13'};return map[iv]||map[iv%12]||String(iv)}
-function chordSummary(ch){return [...ch.chord,...ch.tensions].map(iv=>`${noteName(pitchClass(ch.root,iv),ch.preferFlats)} (${intervalLabel(iv)})`).join(' / ')}
-function practicalVoicing(ch){const base=60+ch.root,low=55,high=76;let notes=ch.all.map(iv=>({midi:base+iv,iv})).map(o=>{let n=o.midi;while(n>high)n-=12;while(n<low)n+=12;return{midi:n,iv:o.iv}}).sort((a,b)=>a.midi-b.midi);const seen=new Set();return notes.filter(o=>!seen.has(o.midi)&&(seen.add(o.midi),true))}
-function midiToVex(m){return pcVex[((m%12)+12)%12]+'/'+(Math.floor(m/12)-1)}
-function drawScore(ch){const box=document.getElementById('score');box.innerHTML='';if(!window.Vex){box.textContent='楽譜ライブラリを読み込めませんでした。';return}const{Renderer,Stave,StaveNote,Voice,Formatter,Accidental,Annotation,Modifier}=Vex.Flow,width=900,renderer=new Renderer(box,Renderer.Backends.SVG);renderer.resize(width,235);const ctx=renderer.getContext(),stave=new Stave(35,50,width-70);stave.addClef('treble').addTimeSignature('4/4').setContext(ctx).draw();const keys=practicalVoicing(ch).map(o=>midiToVex(o.midi)),note=new StaveNote({clef:'treble',keys,duration:'w'});keys.forEach((k,i)=>{if(k.includes('#'))note.addModifier(new Accidental('#'),i);else if(k.includes('b/'))note.addModifier(new Accidental('b'),i)});note.addModifier(new Annotation(ch.symbol).setVerticalJustification(Modifier.Position.ABOVE),0);const voice=new Voice({num_beats:4,beat_value:4});voice.addTickables([note]);new Formatter().joinVoices([voice]).format([voice],width-210);voice.draw(ctx,stave)}
-function drawKeyboard(ch){const box=document.getElementById('keyboard'),start=48,end=83,whitePC=new Set([0,2,4,5,7,9,11]),whites=[];for(let m=start;m<=end;m++)if(whitePC.has(m%12))whites.push(m);const W=1000,H=245,margin=18,whiteW=(W-2*margin)/whites.length,whiteH=185,y=24,chordPC=new Set(ch.chord.map(iv=>pitchClass(ch.root,iv))),tensionPC=new Set(ch.tensions.map(iv=>pitchClass(ch.root,iv)));const color=pc=>pc===ch.root?'#66a9ff':tensionPC.has(pc)?'#d8b35e':'#dce8f7';let svg=`<svg class="visual" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="#fff"/>`;whites.forEach((m,i)=>{const x=margin+i*whiteW;svg+=`<rect x="${x}" y="${y}" width="${whiteW}" height="${whiteH}" fill="#fff" stroke="#111827" stroke-width="1.5"/>`});const blackPC=new Set([1,3,6,8,10]);let wi=0;for(let m=start;m<=end;m++){const pc=m%12;if(whitePC.has(pc)){wi++;continue}if(blackPC.has(pc)){const x=margin+wi*whiteW-whiteW*.32;svg+=`<rect x="${x}" y="${y}" width="${whiteW*.64}" height="${whiteH*.62}" rx="2" fill="#111827"/>`}}for(let m=start;m<=end;m++){const pc=m%12;if(!(chordPC.has(pc)||tensionPC.has(pc)))continue;let cx,cy;if(whitePC.has(pc)){const idx=whites.indexOf(m);cx=margin+(idx+.5)*whiteW;cy=y+whiteH-33}else{let prev=0;for(let x=start;x<m;x++)if(whitePC.has(x%12))prev++;cx=margin+prev*whiteW;cy=y+whiteH*.62-25}svg+=`<circle cx="${cx}" cy="${cy}" r="15" fill="${color(pc)}" stroke="#07111f" stroke-width="2"/><text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="Arial" font-size="12" font-weight="700" fill="#07111f">${noteName(pc,ch.preferFlats)}</text>`}box.innerHTML=svg+'</svg>'}
-function drawFretboard(ch){const box=document.getElementById('fretboard'),W=1000,H=340,left=78,right=30,top=42,bottom=40,frets=12,strings=6,fretW=(W-left-right)/frets,stringGap=(H-top-bottom)/(strings-1),tuning=[64,59,55,50,45,40],chordPC=new Set(ch.chord.map(iv=>pitchClass(ch.root,iv))),tensionPC=new Set(ch.tensions.map(iv=>pitchClass(ch.root,iv))),color=pc=>pc===ch.root?'#66a9ff':tensionPC.has(pc)?'#d8b35e':'#dce8f7';let svg=`<svg class="visual" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="#fff"/>`;for(let f=0;f<=frets;f++){const x=f===0?left-34:left+(f-.5)*fretW;svg+=`<text x="${x}" y="25" text-anchor="middle" font-family="Arial" font-size="13" fill="#667085">${f}</text>`}svg+=`<line x1="${left}" y1="${top-10}" x2="${left}" y2="${H-bottom+10}" stroke="#111827" stroke-width="6"/>`;for(let f=1;f<=frets;f++){const x=left+f*fretW;svg+=`<line x1="${x}" y1="${top-10}" x2="${x}" y2="${H-bottom+10}" stroke="#667085" stroke-width="1.5"/>`}[3,5,7,9].forEach(f=>{const x=left+(f-.5)*fretW,y=(top+H-bottom)/2;svg+=`<circle cx="${x}" cy="${y}" r="5" fill="#cbd5e1"/>`});{const x=left+11.5*fretW,mid=(top+H-bottom)/2;svg+=`<circle cx="${x}" cy="${mid-28}" r="5" fill="#cbd5e1"/><circle cx="${x}" cy="${mid+28}" r="5" fill="#cbd5e1"/>`}tuning.forEach((openMidi,s)=>{const y=top+s*stringGap;svg+=`<line x1="${left-42}" y1="${y}" x2="${W-right}" y2="${y}" stroke="#344054" stroke-width="${1.4+s*.25}"/><text x="22" y="${y+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#344054">${noteName(openMidi%12,false)}</text>`;for(let f=0;f<=frets;f++){const pc=(openMidi+f)%12;if(!(chordPC.has(pc)||tensionPC.has(pc)))continue;const x=f===0?left-24:left+(f-.5)*fretW;svg+=`<circle cx="${x}" cy="${y}" r="13.5" fill="${color(pc)}" stroke="#07111f" stroke-width="1.7"/><text x="${x}" y="${y+4.5}" text-anchor="middle" font-family="Arial" font-size="11.5" font-weight="800" fill="#07111f">${noteName(pc,ch.preferFlats)}</text>`}});box.innerHTML=svg+'</svg>'}
-function renderTabs(){const box=document.getElementById('tabs');box.innerHTML='';progression.forEach((ch,i)=>{const b=document.createElement('button');b.className='tab'+(i===selectedIndex?' active':'');b.textContent=ch.symbol;b.onclick=()=>{selectedIndex=i;renderAll()};box.appendChild(b)})}
-function renderAll(){const ch=progression[selectedIndex];renderTabs();document.getElementById('summary').innerHTML=`<span class="badge"><strong>${ch.symbol}</strong></span><span class="badge">${chordSummary(ch)}</span>`;drawScore(ch);drawKeyboard(ch);drawFretboard(ch)}
-function parseProgression(){const raw=document.getElementById('chords').value.trim(),syms=raw.split(/[,|]/).map(s=>s.trim()).filter(Boolean),parsed=syms.map(parseChord),bad=parsed.findIndex(x=>!x);if(bad>=0){document.getElementById('error').textContent='解釈できないコードがあります: '+syms[bad];return}document.getElementById('error').textContent='';progression=parsed;selectedIndex=0;renderAll()}
-const p=new URLSearchParams(location.search);if(p.get('chords'))document.getElementById('chords').value=p.get('chords');document.getElementById('drawBtn').addEventListener('click',parseProgression);parseProgression();
-</script>
-</body></html>
+const NM={C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+const SH=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],FL=["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+const LI={C:0,D:1,E:2,F:3,G:4,A:5,B:6};let prog=[],sel=0;
+const pc=x=>((x%12)+12)%12,nm=(x,f)=>(f?FL:SH)[pc(x)],uniq=a=>[...new Set(a)];
+
+function parse(sym){
+ let d=sym.trim(),s=d.replace(/♭/g,"b").replace(/♯/g,"#").replace(/Δ/g,"maj").split("/")[0],m=s.match(/^([A-G])([#b]?)(.*)$/);if(!m)return null;
+ let root=NM[m[1]+m[2]],q=m[3].toLowerCase().replace(/\s+/g,"").replace(/^minor/,"m").replace(/^min/,"m"),flat=d.includes("♭")||(m[2]==="b");
+ let tone=[0,4,7],ten=[],third=4,sev=null;
+ const half=q.includes("m7b5")||q.includes("ø"),d7=q.includes("dim7")||q.includes("°7"),dim=!d7&&(q.includes("dim")||q.includes("°")),minor=q.startsWith("m")&&!q.startsWith("maj")&&!half;
+ if(half){tone=[0,3,6,10];third=3;sev=10}else if(d7){tone=[0,3,6,9];third=3;sev=9}else if(dim){tone=[0,3,6];third=3}else if(q.includes("sus2")){tone=[0,2,7];third=null}else if(q.includes("sus4")||q==="sus"){tone=[0,5,7];third=null}else if(minor){tone=[0,3,7];third=3}
+ if(!half&&!dim&&!d7){if(/maj(7|9|11|13)/.test(q)){tone.push(11);sev=11}else if(/[7913]/.test(q)||q.includes("11")){tone.push(10);sev=10}}
+ if(q.includes("b5")){tone=tone.filter(x=>x!==7);tone.push(6)} if(q.includes("#5")||q.includes("aug")){tone=tone.filter(x=>x!==7);tone.push(8)}
+ if(q==="6"||q==="m6"||q.includes("6/9"))tone.push(9);
+ if(q.includes("b9"))ten.push(13);if(q.includes("#9"))ten.push(15);
+ if((q.includes("add9")||q.includes("6/9")||q.includes("maj9")||q.includes("m9")||q==="9"||q.includes("11")||q.includes("13"))&&!q.includes("b9")&&!q.includes("#9"))ten.push(14);
+ if(q.includes("#11"))ten.push(18);else if(q.includes("11")||q.includes("add11"))ten.push(17);
+ if(q.includes("b13"))ten.push(20);else if(q.includes("13"))ten.push(21);
+ tone=uniq(tone).sort((a,b)=>a-b);ten=uniq(ten).sort((a,b)=>a-b);
+ let ess=[0];if(third!==null)ess.push(third);if(sev!==null)ess.push(sev);ess.push(...ten);
+ return{symbol:d,root,q,flat,tone,ten,ess:uniq(ess)}
+}
+function role(iv,ch){if(iv===0)return"R";if(ch.ten.includes(iv))return({13:"b9",14:"9",15:"#9",17:"11",18:"#11",20:"b13",21:"13"})[iv]||"T";return({2:"2",3:"b3",4:"3",5:"4",6:"b5",7:"5",8:"#5",9:"6",10:"b7",11:"7"})[iv%12]||"CT"}
+function isT(pc_,ch){return ch.ten.some(iv=>pc(ch.root+iv)===pc_)}
+
+function pvo(ch){
+ // Keep interval order so the written notes and staff positions agree.
+ // Example Dm9 -> D4 F4 A4 C5 E5, G13 -> G3 B3 D4 F4 A4 E5.
+ let intervals=uniq([...ch.tone,...ch.ten]).sort((a,b)=>a-b);
+ let maxIv=Math.max(...intervals);
+
+ // Highest practical root that keeps the highest written extension at or below E5 (MIDI 76).
+ let maxRoot=76-maxIv;
+ let rootMidi=null;
+ for(let m=maxRoot;m>=43;m--){
+   if(m%12===ch.root){rootMidi=m;break}
+ }
+ if(rootMidi===null){
+   for(let m=48;m<=60;m++)if(m%12===ch.root){rootMidi=m;break}
+ }
+
+ return intervals.map(iv=>({m:rootMidi+iv,iv}));
+}
+function mname(m,f){return nm(m%12,f)+(Math.floor(m/12)-1)}
+function sy(m,f){
+ let a=mname(m,f).match(/^([A-G])([#b]?)(-?\d+)$/);
+ let idx=+a[3]*7+LI[a[1]];
+ let e4=4*7+LI.E;
+ let bottomLineY=106+4*22; // 194px = E4, the bottom treble-staff line
+ return bottomLineY-(idx-e4)*11;
+}
+function color(p,ch){return p===ch.root?"#66a9ff":isT(p,ch)?"#d8b35e":"#dce8f7"}
+
+function score(ch,v){
+ let W=920,H=300,L=115,R=875,T=106,g=22,s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="#fff"/><text x="45" y="52" font-family="Arial" font-size="28" font-weight="700" fill="#111827">${ch.symbol}</text>`;
+ for(let i=0;i<5;i++){let y=T+i*g;s+=`<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="#111827" stroke-width="2"/>`}s+=`<text x="60" y="190" font-family="serif" font-size="88" fill="#111827">𝄞</text>`;
+ v.forEach((o,i)=>{let x=295+i*92,y=sy(o.m,ch.flat),p=o.m%12,b=T+4*g;
+   if(y>b+5)for(let ly=b+g;ly<=y+3;ly+=g)s+=`<line x1="${x-19}" y1="${ly}" x2="${x+19}" y2="${ly}" stroke="#111827" stroke-width="2"/>`;
+   if(y<T-5)for(let ly=T-g;ly>=y-3;ly-=g)s+=`<line x1="${x-19}" y1="${ly}" x2="${x+19}" y2="${ly}" stroke="#111827" stroke-width="2"/>`;
+   let n=mname(o.m,ch.flat),acc=n.includes("#")?"#":n.includes("b")?"♭":"";if(acc)s+=`<text x="${x-29}" y="${y+6}" font-family="Arial" font-size="24" fill="#111827">${acc}</text>`;
+   s+=`<ellipse cx="${x}" cy="${y}" rx="13" ry="9" transform="rotate(-14 ${x} ${y})" fill="${color(p,ch)}" stroke="#111827" stroke-width="2.5"/><text x="${x}" y="257" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700" fill="#344054">${nm(p,ch.flat)}</text>`});
+ document.getElementById("score").innerHTML=s+"</svg>"
+}
+function keyboard(ch,v){
+ let W=1000,H=255,L=22,y=25,hh=185,start=48,end=83,wp=new Set([0,2,4,5,7,9,11]),wh=[];for(let m=start;m<=end;m++)if(wp.has(m%12))wh.push(m);let ww=(W-L*2)/wh.length;
+ let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="#fff"/>`;
+ wh.forEach((m,i)=>s+=`<rect x="${L+i*ww}" y="${y}" width="${ww}" height="${hh}" fill="#fff" stroke="#111827" stroke-width="1.4"/>`);
+ for(let m=start;m<=end;m++)if(!wp.has(m%12)){let c=0;for(let n=start;n<m;n++)if(wp.has(n%12))c++;s+=`<rect x="${L+c*ww-ww*.31}" y="${y}" width="${ww*.62}" height="${hh*.62}" rx="2" fill="#111827"/>`}
+ v.forEach(o=>{let m=o.m,p=m%12,cx,cy;if(wp.has(p)){let i=wh.indexOf(m);cx=L+(i+.5)*ww;cy=y+hh-31}else{let c=0;for(let n=start;n<m;n++)if(wp.has(n%12))c++;cx=L+c*ww;cy=y+hh*.62-25}s+=`<circle cx="${cx}" cy="${cy}" r="15" fill="${color(p,ch)}" stroke="#07111f" stroke-width="2"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-family="Arial" font-size="11" font-weight="800" fill="#07111f">${nm(p,ch.flat)}</text>`});
+ document.getElementById("keys").innerHTML=s+"</svg>";document.getElementById("ptext").textContent="参考ボイシング： "+v.map(o=>mname(o.m,ch.flat)+"("+role(o.iv,ch)+")").join("  ")
+}
+function gshape(ch){
+ // No open strings. Standard tuning, frets 1-12 only.
+ const open=[40,45,50,55,59,64];
+ const target=uniq([...ch.tone,...ch.ten].map(iv=>pc(ch.root+iv)));
+ const essential=uniq(ch.ess.map(iv=>pc(ch.root+iv)));
+ let best=null;
+
+ for(let low=1;low<=8;low++){
+  const high=Math.min(12,low+4);
+  const opts=open.map(m=>{
+   let a=[-1]; // mute is allowed
+   for(let f=1;f<=12;f++){
+    if(f<low||f>high)continue;
+    if(target.includes((m+f)%12))a.push(f);
+   }
+   return a;
+  });
+
+  function rec(si,c){
+   if(si===6){
+    let used=c.map((f,i)=>({f,i,m:f<0?null:open[i]+f})).filter(x=>x.f>=1);
+    if(used.length<4||used.length>6)return;
+
+    let pcs=uniq(used.map(x=>x.m%12));
+    let eh=essential.filter(x=>pcs.includes(x)).length;
+    let th=target.filter(x=>pcs.includes(x)).length;
+    let frets=used.map(x=>x.f);
+    let span=Math.max(...frets)-Math.min(...frets);
+    let rootLow=(used[0].m%12===ch.root)?1:0;
+    let dup=used.length-pcs.length;
+
+    let score=eh*110+th*24+rootLow*20+used.length*4-(essential.length-eh)*90-span*8-dup*5;
+
+    // Prefer compact mid-neck shapes over very high positions.
+    let avg=frets.reduce((a,b)=>a+b,0)/frets.length;
+    score-=Math.max(0,avg-8)*2;
+
+    if(!best||score>best.score)best={score,c:[...c]};
+    return;
+   }
+   for(const f of opts[si]){
+    c.push(f);rec(si+1,c);c.pop();
+   }
+  }
+  rec(0,[]);
+ }
+ return best?best.c:[-1,-1,-1,-1,-1,-1];
+}
+function fret(ch,sh){
+ let W=1000,H=350,L=95,R=25,T=48,B=45,fw=(W-L-R)/12,sg=(H-T-B)/5,open=[40,45,50,55,59,64],names=["E","A","D","G","B","E"];
+ let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="#fff"/>`;
+ for(let f=0;f<=12;f++){let x=f===0?L-34:L+(f-.5)*fw;s+=`<text x="${x}" y="25" text-anchor="middle" font-family="Arial" font-size="13" fill="#667085">${f}</text>`}s+=`<line x1="${L}" y1="${T-10}" x2="${L}" y2="${H-B+10}" stroke="#111827" stroke-width="7"/>`;for(let f=1;f<=12;f++)s+=`<line x1="${L+f*fw}" y1="${T-10}" x2="${L+f*fw}" y2="${H-B+10}" stroke="#98a2b3" stroke-width="1.4"/>`;
+ for(let d=0;d<6;d++){let si=5-d,y=T+d*sg;s+=`<line x1="${L-48}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#344054" stroke-width="${1.2+(5-d)*.22}"/><text x="24" y="${y+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#344054">${names[si]}</text>`;let f=sh[si];if(f<0){s+=`<text x="${L-26}" y="${y+6}" text-anchor="middle" font-family="Arial" font-size="18" font-weight="700" fill="#98a2b3">×</text>`;continue}let m=open[si]+f,p=m%12,x=f===0?L-25:L+(f-.5)*fw;s+=`<circle cx="${x}" cy="${y}" r="15" fill="${color(p,ch)}" stroke="#07111f" stroke-width="2"/><text x="${x}" y="${y+4}" text-anchor="middle" font-family="Arial" font-size="11" font-weight="800" fill="#07111f">${nm(p,ch.flat)}</text>`}
+ document.getElementById("fret").innerHTML=s+"</svg>";document.getElementById("gtext").textContent="6弦→1弦： "+sh.map(f=>f<0?"x":f).join("-")+" （参考ボイシング）"
+}
+function tabs(){let b=document.getElementById("tabs");b.innerHTML="";prog.forEach((ch,i)=>{let x=document.createElement("button");x.className="tab"+(i===sel?" active":"");x.textContent=ch.symbol;x.onclick=()=>{sel=i;render()};b.appendChild(x)})}
+function render(){let ch=prog[sel];tabs();let a=[...ch.tone.map(iv=>({iv})),...ch.ten.map(iv=>({iv}))];document.getElementById("summary").innerHTML=`<span class="badge"><b>${ch.symbol}</b></span><span class="badge">${a.map(o=>nm(ch.root+o.iv,ch.flat)+"("+role(o.iv,ch)+")").join(" / ")}</span>`;let v=pvo(ch);score(ch,v);keyboard(ch,v);fret(ch,gshape(ch))}
+function load(){let syms=document.getElementById("chords").value.split(/[,\|]/).map(x=>x.trim()).filter(Boolean),p=syms.map(parse),bad=p.findIndex(x=>!x);if(bad>=0){document.getElementById("err").textContent="解釈できないコード："+syms[bad];return}document.getElementById("err").textContent="";prog=p;sel=0;render()}
+let qs=new URLSearchParams(location.search);if(qs.get("chords"))document.getElementById("chords").value=qs.get("chords");document.getElementById("go").onclick=load;load();
+</script></body></html>
