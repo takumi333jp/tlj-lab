@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TLJ Chord Lab v5</title>
+<title>TLJ Chord Lab v10</title>
 <style>
 :root{
   --bg:#07111f;--panel:#0e1c2f;--panel2:#091524;--text:#f5f7fb;--muted:#9eb0c7;
@@ -110,13 +110,68 @@ code{color:#f2d78f}
   .wrap{padding-left:10px;padding-right:10px}
   .now{display:none}
 }
+
+select{
+  width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);
+  border-radius:11px;padding:11px 12px;font-size:15px
+}
+.labGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.scalePanel,.reharmPanel{
+  background:#091524;border:1px solid var(--line);border-radius:14px;padding:13px
+}
+.scalePanel h3,.reharmPanel h3{margin:0 0 8px;font-size:16px}
+.miniLabel{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px}
+.actionRow{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.actionRow button{width:auto;flex:1;min-width:130px;margin:0}
+.scaleDesc,.functionText{font-size:12px;line-height:1.55;color:#c9d5e5;margin-top:8px}
+.reharmSlots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}
+.reharmSlot{background:#0a1727;border:1px solid #29415f;border-radius:12px;padding:10px}
+.reharmTop{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
+.reharmIndex{font-size:12px;color:var(--muted)}
+.reharmChord{font-weight:800}
+.functionBadge{display:inline-block;font-size:11px;border:1px solid #34506e;border-radius:999px;padding:4px 7px;color:#dce8f7}
+.reharmSlot select{font-size:13px;padding:9px}
+.reharmSlot button{width:100%;margin-top:7px;padding:9px;font-size:13px}
+.materialBadge{display:inline-block;margin-left:6px;font-size:11px;padding:3px 7px;border-radius:999px;background:#17283d;color:#dce8f7}
+@media(max-width:700px){
+  .labGrid,.reharmSlots{grid-template-columns:1fr}
+}
+
+
+.progressionModeRow{
+  display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px
+}
+.progressionModeRow label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+.followBadge{
+  display:inline-block;border:1px solid #34506e;border-radius:999px;
+  padding:4px 8px;font-size:11px;color:#dce8f7;margin-top:6px
+}
+@media(max-width:700px){.progressionModeRow{grid-template-columns:1fr}}
+
+.embeddedScaleAudition{
+  background:#091524;border:1px solid var(--line);border-radius:12px;
+  padding:11px;margin:10px 0
+}
+.embeddedScaleAudition .auditionTitle{
+  font-size:13px;font-weight:800;margin-bottom:7px;color:#dfe8f4
+}
+.embeddedScaleAudition .auditionRow{
+  display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,minmax(120px,auto));
+  gap:7px;align-items:center
+}
+.embeddedScaleAudition button{width:auto;margin:0;padding:9px 10px;font-size:13px}
+.embeddedScaleAudition select{font-size:13px;padding:9px}
+@media(max-width:760px){
+  .embeddedScaleAudition .auditionRow{grid-template-columns:1fr 1fr}
+  .embeddedScaleAudition select{grid-column:1/-1}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">THINK LIKE JAZZ</div>
-  <h1>TLJ Chord Lab v5</h1>
-  <p class="lead">コード進行を、<strong>聴く・五線譜で見る・鍵盤で見る・ギターで見る</strong>を1ページで確認します。</p>
+  <h1>TLJ Chord Lab v10</h1>
+  <p class="lead">コード・ガイドトーン・選択Scale・リハーモナイズを、<strong>聴く → 見る → 比較する → 置き換える</strong>まで1ページで確認します。</p>
 
   <div class="card">
     <div class="controls">
@@ -149,14 +204,73 @@ code{color:#f2d78f}
       <span><span class="dot tensionDot"></span>Tension</span>
     </div>
 
+    <div class="progressionModeRow">
+      <div>
+        <label for="progressionSoundMode">コード進行の再生モード</label>
+        <select id="progressionSoundMode">
+          <option value="chords">コードのみ</option>
+          <option value="scale">コード＋選択Scale（上行）</option>
+          <option value="solo">コード＋選択Scale Solo</option>
+          <option value="guide">Guide Tone進行</option>
+        </select>
+      </div>
+      <div>
+        <label>Scale追従</label>
+        <div class="followBadge">各コードごとにScaleを保存し、Reharm後は自動再選択</div>
+      </div>
+    </div>
+
     <div class="transport">
-      <button id="playAll">▶ 進行を再生</button>
+      <button id="playAll">▶ 選択モードで進行</button>
+      <button id="playGuideAll" class="secondary">▶ ガイドトーン進行</button>
       <button id="playOne" class="secondary">♪ このコード</button>
+      <button id="playGuideOne" class="secondary">♪ ガイドトーン</button>
       <button id="stopBtn" class="secondary">■ 停止</button>
     </div>
 
     <div class="status" id="status">コードを選ぶと3つの図も同時に更新されます。</div>
     <div class="error" id="error"></div>
+  </div>
+
+  <div class="card">
+    <div class="sectionTitle">🎧 Sound & Scale</div>
+    <p class="sub">選択したScaleには代表的な対応Chordを表示・再生します。鳴らしている素材に五線譜・鍵盤・ギター指板も追従します。対応Chordは唯一の正解ではなく、Key・機能・メロディー・スタイルで判断してください。</p>
+
+    <div class="labGrid">
+      <div class="scalePanel">
+        <h3>Jazz Scale Library</h3>
+
+        <label class="miniLabel" for="scaleCategory">カテゴリ</label>
+        <select id="scaleCategory"></select>
+
+        <label class="miniLabel" for="scaleSelect">Scale</label>
+        <select id="scaleSelect"></select>
+
+        <label class="miniLabel" for="scaleRootSelect">Scale Root</label>
+        <select id="scaleRootSelect"></select>
+
+        <div class="scaleDesc" id="scaleDesc"></div>
+
+        <div class="actionRow">
+          <button id="playScale" class="secondary">▶ Scale</button>
+          <button id="playScaleChord" class="secondary">▶ 対応Chord</button>
+          <button id="playChordScale">▶ 対応Chord + Scale</button>
+          <button id="autoAssignScales" class="secondary">↻ 全コードをおすすめScaleへ</button>
+        </div>
+      </div>
+
+      <div class="reharmPanel">
+        <h3>Reharmonize</h3>
+        <div class="functionText">
+          各コードの機能を確認しながら、1コードずつ置き換えます。候補は「唯一の正解」ではありません。メロディー、ベース、声部進行、目的を聴いて判断してください。
+        </div>
+        <div class="actionRow">
+          <button id="resetReharm" class="secondary">↩ 基本進行へ戻す</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="reharmSlots" id="reharmSlots"></div>
   </div>
 
   <div class="card">
@@ -168,7 +282,7 @@ code{color:#f2d78f}
 
   <div class="card">
     <div class="sectionTitle">🎹 ピアノ鍵盤</div>
-    <p class="sub">コード・ボイシングに加えて、対応スケールも同じ鍵盤上で確認できます。</p>
+    <p class="sub">コード・ボイシングと対応Scaleを同じ鍵盤で確認し、この画面からScale／対応Chord／Chord+Scaleを直接試聴できます。</p>
 
     <div class="pianoModes" id="pianoModes">
       <button class="pianoModeBtn active" data-piano-mode="chord">コードフォーム</button>
@@ -181,13 +295,23 @@ code{color:#f2d78f}
       コードフォーム：実際に再生する参考ボイシングだけを表示します。
     </div>
 
+    <div class="embeddedScaleAudition">
+      <div class="auditionTitle">🎧 対応Scaleを聴く｜ピアノ</div>
+      <div class="auditionRow">
+        <select id="pianoScaleSelectLocal" aria-label="ピアノ用対応スケール"></select>
+        <button id="pianoPlayScale" class="secondary">▶ Scale</button>
+        <button id="pianoPlayScaleChord" class="secondary">▶ 対応Chord</button>
+        <button id="pianoPlayChordScale">▶ Chord + Scale</button>
+      </div>
+    </div>
+
     <div class="visualWrap" id="keyboard"></div>
     <div class="detailText" id="pianoText"></div>
   </div>
 
   <div class="card">
     <div class="sectionTitle">🎸 ギター指板</div>
-    <p class="sub">Standard Tuning／開放弦なし。コードフォームと、そのコードに対応するKey内スケールを結び付けて確認します。</p>
+    <p class="sub">Standard Tuning／開放弦なし。コードフォームと対応Scaleを結び付け、この画面からScale／対応Chord／Chord+Scaleを直接試聴できます。</p>
 
     <div class="guitarModes" id="guitarModes">
       <button class="guitarModeBtn active" data-mode="general">一般フォーム</button>
@@ -208,6 +332,16 @@ code{color:#f2d78f}
     <div class="scaleInfo" id="scaleInfo"></div>
     <div class="modeHelp" id="scaleModeHelp">
       コードフォーム：現在選択中のコードフォームだけを表示します。
+    </div>
+
+    <div class="embeddedScaleAudition">
+      <div class="auditionTitle">🎧 対応Scaleを聴く｜ギター</div>
+      <div class="auditionRow">
+        <select id="guitarScaleSelectLocal" aria-label="ギター用対応スケール"></select>
+        <button id="guitarPlayScale" class="secondary">▶ Scale</button>
+        <button id="guitarPlayScaleChord" class="secondary">▶ 対応Chord</button>
+        <button id="guitarPlayChordScale">▶ Chord + Scale</button>
+      </div>
     </div>
 
     <div class="visualWrap" id="fretboard"></div>
@@ -254,6 +388,10 @@ let scaleViewMode="chord";
 let currentKeyRoot=0;
 let currentKeyFlat=false;
 let pianoViewMode="chord";
+let baseSymbols=[];
+let currentMaterialMode="chord";
+let scaleAssignments=[];
+let progressionSoundMode="chords";
 
 function uniq(a){return [...new Set(a)]}
 function pc(n){return ((n%12)+12)%12}
@@ -448,18 +586,17 @@ function drawScore(ch,v){
 
 /* ---------- Keyboard ---------- */
 function drawKeyboard(ch,v){
-  const scale=scaleForChord(ch);
-  document.getElementById("pianoScaleInfo").innerHTML = scale.ok
-    ? `<span class="scaleBadge"><strong>${scale.name}</strong></span><span class="scaleBadge">${scale.key.name} Major｜${scale.degree}</span>`
-    : `<span class="scaleBadge">${scale.reason}</span>`;
+  const scale=scaleObjectForIndex(selected);
+  document.getElementById("pianoScaleInfo").innerHTML =
+    `<span class="scaleBadge"><strong>${scale.name}</strong></span><span class="scaleBadge">${scale.degree}</span>`;
 
-  if(pianoViewMode==="scale" && scale.ok){
+  if(pianoViewMode==="scale"){
     drawPianoScaleOnly(ch,scale);
     document.getElementById("pianoText").textContent=
       scale.name+"｜C3〜B5の対応スケール全体表示";
     return;
   }
-  if(pianoViewMode==="overlay" && scale.ok){
+  if(pianoViewMode==="overlay"){
     drawPianoScaleOverlay(ch,v,scale);
     document.getElementById("pianoText").textContent=
       "参考ボイシング＋"+scale.name+"｜コード周辺のスケールポジション";
@@ -920,20 +1057,19 @@ function guitarShape(ch){
 
 function drawFretboard(ch,shapeObj){
   const shape=shapeObj.frets;
-  const scale=scaleForChord(ch);
+  const scale=scaleObjectForIndex(selected);
 
-  document.getElementById("scaleInfo").innerHTML = scale.ok
-    ? `<span class="scaleBadge"><strong>${scale.name}</strong></span><span class="scaleBadge">${scale.key.name} Major｜${scale.degree}</span>`
-    : `<span class="scaleBadge">${scale.reason}</span>`;
+  document.getElementById("scaleInfo").innerHTML =
+    `<span class="scaleBadge"><strong>${scale.name}</strong></span><span class="scaleBadge">${scale.degree}</span>`;
 
-  if(scaleViewMode==="scale" && scale.ok){
+  if(scaleViewMode==="scale"){
     drawScaleOnlyFretboard(ch,scale);
     document.getElementById("guitarText").textContent=
       scale.name+"｜1〜15フレットのスケール全体表示（開放弦なし）";
     return;
   }
 
-  if(scaleViewMode==="overlay" && scale.ok){
+  if(scaleViewMode==="overlay"){
     drawScaleOverlayFretboard(ch,shapeObj,scale);
     document.getElementById("guitarText").textContent=
       shapeObj.label+"＋"+scale.name+"｜コードフォーム周辺のスケールポジション";
@@ -1065,6 +1201,917 @@ function drawScaleOverlayFretboard(ch,shapeObj,scale){
   document.getElementById("fretboard").innerHTML=s;
 }
 
+
+
+/* =========================================================
+   JAZZ SCALE LIBRARY
+   Broad practical library for jazz / modern-jazz study.
+   It is intentionally selectable; no scale is universally "the answer".
+========================================================= */
+const SCALE_LIBRARY = [
+  {id:"ionian",cat:"Major Modes",name:"Ionian / Major",ints:[0,2,4,5,7,9,11],use:"Major tonic / diatonic I. 基本となるMajor Scale。"},
+  {id:"dorian",cat:"Major Modes",name:"Dorian",ints:[0,2,3,5,7,9,10],use:"m7。特にii系、modal minorで頻出。"},
+  {id:"phrygian",cat:"Major Modes",name:"Phrygian",ints:[0,1,3,5,7,8,10],use:"m7で♭2を含むmodal sound。文脈確認。"},
+  {id:"lydian",cat:"Major Modes",name:"Lydian",ints:[0,2,4,6,7,9,11],use:"Maj7 / Maj7#11。Major系の代表的選択肢。"},
+  {id:"mixolydian",cat:"Major Modes",name:"Mixolydian",ints:[0,2,4,5,7,9,10],use:"Dominant7の基本的なdiatonic sound。"},
+  {id:"aeolian",cat:"Major Modes",name:"Aeolian / Natural Minor",ints:[0,2,3,5,7,8,10],use:"Natural minor / vi系。"},
+  {id:"locrian",cat:"Major Modes",name:"Locrian",ints:[0,1,3,5,6,8,10],use:"m7♭5のdiatonic option。"},
+
+  {id:"jazzminor",cat:"Melodic Minor",name:"Jazz Melodic Minor",ints:[0,2,3,5,7,9,11],use:"mMaj7、minor tonic color。上下行同型。"},
+  {id:"dorianb2",cat:"Melodic Minor",name:"Dorian ♭2",ints:[0,1,3,5,7,9,10],use:"m7 / sus系で♭2 color。Melodic Minor mode 2。"},
+  {id:"lydianaug",cat:"Melodic Minor",name:"Lydian Augmented",ints:[0,2,4,6,8,9,11],use:"Maj7#5 / Maj7#11#5。"},
+  {id:"lydiandom",cat:"Melodic Minor",name:"Lydian Dominant",ints:[0,2,4,6,7,9,10],use:"7#11。Non-resolving dominantやtritone-sub系でも重要。"},
+  {id:"mixob6",cat:"Melodic Minor",name:"Mixolydian ♭6",ints:[0,2,4,5,7,8,10],use:"7♭13 / dominant color。"},
+  {id:"locriannat2",cat:"Melodic Minor",name:"Locrian ♮2",ints:[0,2,3,5,6,8,10],use:"m7♭5でLocrianより9thを自然音にした代表的option。"},
+  {id:"altered",cat:"Melodic Minor",name:"Altered / Super Locrian",ints:[0,1,3,4,6,8,10],use:"Alt dominant。♭9/#9、♭5/#5を含む強い解決系dominant sound。"},
+
+  {id:"harmminor",cat:"Harmonic Minor",name:"Harmonic Minor",ints:[0,2,3,5,7,8,11],use:"Minor tonic / minor-key harmony。"},
+  {id:"locriannat6",cat:"Harmonic Minor",name:"Locrian ♮6",ints:[0,1,3,5,6,9,10],use:"Harmonic Minor mode 2。m7♭5系の特殊color。"},
+  {id:"ionianaug",cat:"Harmonic Minor",name:"Ionian Augmented",ints:[0,2,4,5,8,9,11],use:"Maj7#5 color。"},
+  {id:"dorians4",cat:"Harmonic Minor",name:"Dorian ♯4",ints:[0,2,3,6,7,9,10],use:"m7 #11 color。"},
+  {id:"phrygdom",cat:"Harmonic Minor",name:"Phrygian Dominant / HMP5B",ints:[0,1,4,5,7,8,10],use:"7♭9♭13系。Harmonic Minor Perfect 5th Belowとしても捉えられる。"},
+  {id:"lydians2",cat:"Harmonic Minor",name:"Lydian ♯2",ints:[0,3,4,6,7,9,11],use:"Maj7 #2/#9 color。"},
+  {id:"ultraloc",cat:"Harmonic Minor",name:"Ultra Locrian / Super Locrian ♭♭7",ints:[0,1,3,4,6,8,9],use:"非常にalteredなmode。名称・綴りは理論体系により差がある。"},
+
+  {id:"harmmajor",cat:"Harmonic Major",name:"Harmonic Major",ints:[0,2,4,5,7,8,11],use:"Majorに♭6を持つhybrid sound。"},
+  {id:"dorianb5",cat:"Harmonic Major",name:"Dorian ♭5",ints:[0,2,3,5,6,9,10],use:"Harmonic Major mode 2。"},
+  {id:"phrygianb4",cat:"Harmonic Major",name:"Phrygian ♭4",ints:[0,1,3,4,7,8,10],use:"Harmonic Major mode 3。"},
+  {id:"lydianb3",cat:"Harmonic Major",name:"Lydian ♭3",ints:[0,2,3,6,7,9,11],use:"Minor-major hybrid color。"},
+  {id:"mixob2",cat:"Harmonic Major",name:"Mixolydian ♭2",ints:[0,1,4,5,7,9,10],use:"Dominant with ♭9 and natural 13。"},
+  {id:"lydaug2",cat:"Harmonic Major",name:"Lydian Augmented ♯2",ints:[0,3,4,6,8,9,11],use:"Modern color。名称は体系差あり。"},
+  {id:"locbb7",cat:"Harmonic Major",name:"Locrian ♭♭7",ints:[0,1,3,5,6,8,9],use:"Harmonic Major mode 7。名称は体系差あり。"},
+
+  {id:"whole",cat:"Symmetric / Synthetic",name:"Whole Tone",ints:[0,2,4,6,8,10],use:"7#5 / 7♭5系。全音だけの対称音階。"},
+  {id:"halfwhole",cat:"Symmetric / Synthetic",name:"Half–Whole Diminished",ints:[0,1,3,4,6,7,9,10],use:"Dominant diminished。7♭9/♯9/♯11/13系の代表的color。"},
+  {id:"wholehalf",cat:"Symmetric / Synthetic",name:"Whole–Half Diminished",ints:[0,2,3,5,6,8,9,11],use:"dim7上の代表的diminished scale。"},
+  {id:"augmented",cat:"Symmetric / Synthetic",name:"Augmented Scale",ints:[0,3,4,7,8,11],use:"Maj7#5 / augmented harmonyなどで使われる対称音階。"},
+  {id:"chromatic",cat:"Symmetric / Synthetic",name:"Chromatic",ints:[0,1,2,3,4,5,6,7,8,9,10,11],use:"Approach / enclosure素材。コード機能を無視した万能scaleという意味ではない。"},
+
+  {id:"majorpent",cat:"Pentatonic / Blues",name:"Major Pentatonic",ints:[0,2,4,7,9],use:"Major系。音数を絞ったmelodic material。"},
+  {id:"minorpent",cat:"Pentatonic / Blues",name:"Minor Pentatonic",ints:[0,3,5,7,10],use:"Minor / blues / dominantなど幅広いが、文脈で響きが変わる。"},
+  {id:"dominantpent",cat:"Pentatonic / Blues",name:"Dominant Pentatonic",ints:[0,2,4,7,10],use:"1 2 3 5 ♭7。Dominantを簡潔に示す5音素材。"},
+  {id:"blues",cat:"Pentatonic / Blues",name:"Blues Scale",ints:[0,3,5,6,7,10],use:"Minor pentatonic + ♭5。Blues languageの基本素材。"},
+  {id:"majorblues",cat:"Pentatonic / Blues",name:"Major Blues",ints:[0,2,3,4,7,9],use:"Major pentatonicにblue-note的♭3を加えた6音素材。"},
+
+  {id:"bebopdom",cat:"Bebop",name:"Bebop Dominant",ints:[0,2,4,5,7,9,10,11],use:"Mixolydian + Major 7。8分音符ラインのchord-tone placementに使われる。"},
+  {id:"bebopmaj",cat:"Bebop",name:"Bebop Major",ints:[0,2,4,5,7,8,9,11],use:"Major Scale + ♭6。8-note bebop vocabularyの代表例。"}
+];
+
+function scaleById(id){return SCALE_LIBRARY.find(s=>s.id===id)||SCALE_LIBRARY[0]}
+
+function representativeChordSuffix(scaleId){
+  const map={
+    ionian:"maj7",
+    dorian:"m7",
+    phrygian:"m7",
+    lydian:"maj7#11",
+    mixolydian:"7",
+    aeolian:"m7",
+    locrian:"m7b5",
+
+    jazzminor:"mMaj7",
+    dorianb2:"m7b9",
+    lydianaug:"maj7#5#11",
+    lydiandom:"7#11",
+    mixob6:"7b13",
+    locriannat2:"m7b5add9",
+    altered:"7b9#9b13",
+
+    harmminor:"mMaj7",
+    locriannat6:"m7b5",
+    ionianaug:"maj7#5",
+    dorians4:"m7#11",
+    phrygdom:"7b9b13",
+    lydians2:"maj7#9#11",
+    ultraloc:"dim7",
+
+    harmmajor:"maj7",
+    dorianb5:"m7b5",
+    phrygianb4:"m7",
+    lydianb3:"mMaj7#11",
+    mixob2:"7b9",
+    lydaug2:"maj7#5#9#11",
+    locbb7:"dim7",
+
+    whole:"7#5",
+    halfwhole:"7b9#9#11/13",
+    wholehalf:"dim7",
+    augmented:"maj7#5",
+    chromatic:null,
+
+    majorpent:"6/9",
+    minorpent:"m7",
+    dominantpent:"7",
+    blues:"7",
+    majorblues:"6",
+
+    bebopdom:"7",
+    bebopmaj:"6"
+  };
+  return Object.prototype.hasOwnProperty.call(map,scaleId)?map[scaleId]:null;
+}
+
+function scaleRepresentativeChord(scale,currentChord){
+  const suffix=representativeChordSuffix(scale.id);
+
+  // Chromatic scale has no single intrinsic chord correspondence.
+  // Keep the current harmonic context rather than inventing one.
+  if(!suffix){
+    return {
+      chord:currentChord,
+      symbol:currentChord.symbol,
+      note:"Chromatic Scaleは単一の対応コードを持たないため、現在のコードを鳴らします。"
+    };
+  }
+
+  const flat=scale.key?.flat ?? currentChord.flat;
+  const rootName=noteName(scale.root,flat);
+  // Slash is meaningful in 6/9, but the existing chord parser splits slash chords.
+  // Use add9 form for audio/parser while displaying the conventional 6/9 label.
+  const parserSuffix=suffix==="6/9"?"6add9":suffix.replace("/13","13");
+  const parseSymbol=rootName+parserSuffix;
+  const parsed=parseChord(parseSymbol);
+
+  return {
+    chord:parsed||currentChord,
+    symbol:rootName+suffix,
+    note:"Jazz Scale Libraryの代表的な対応コード例。唯一の正解ではなく、実際は機能・メロディー・ボイシングで選択します。"
+  };
+}
+
+
+function recommendedScaleIds(ch,index=null){
+  const ids=[];
+  const idx=index===null ? progression.indexOf(ch) : index;
+
+  // Reharm / function-aware priorities
+  if(idx>=0 && typeof analyzeFunction==="function"){
+    const f=analyzeFunction(ch,idx);
+    if(f.label.includes("Tritone Sub")) ids.push("lydiandom","whole","altered");
+    if(f.label.includes("V7 of")) ids.push("mixolydian","phrygdom","altered","halfwhole");
+    if(f.label.includes("Modal Interchange")) ids.push("dorian","aeolian","jazzminor");
+  }
+  if(ch.quality==="dim") ids.push("wholehalf","halfwhole");
+
+  const context=scaleForChord(ch);
+  if(context.ok){
+    const map={Ionian:"ionian",Dorian:"dorian",Phrygian:"phrygian",Lydian:"lydian",Mixolydian:"mixolydian",Aeolian:"aeolian",Locrian:"locrian"};
+    if(map[context.mode])ids.push(map[context.mode]);
+  }
+
+  const q=ch.quality;
+  if(q==="maj7"||q==="maj9"||q==="maj")ids.push("lydian","ionian","majorpent","harmmajor");
+  if(q==="m7"||q==="m9"||q==="m")ids.push("dorian","aeolian","minorpent","jazzminor");
+  if(q==="m7b5")ids.push("locrian","locriannat2");
+  if(q==="7"||q==="9"||q==="13")ids.push("mixolydian","lydiandom","altered","halfwhole","whole","phrygdom","mixob6","bebopdom");
+  if(q==="dim")ids.push("wholehalf","halfwhole");
+
+  return uniq(ids);
+}
+
+
+function defaultScaleAssignment(ch,index=selected){
+  const rec=recommendedScaleIds(ch,index);
+  return {id:rec[0]||"chromatic",root:"auto",symbol:ch.symbol};
+}
+function ensureScaleAssignment(index,force=false){
+  const ch=progression[index];
+  if(!ch)return null;
+  const a=scaleAssignments[index];
+  if(force || !a || a.symbol!==ch.symbol || !SCALE_LIBRARY.some(s=>s.id===a.id)){
+    scaleAssignments[index]=defaultScaleAssignment(ch,index);
+  }
+  return scaleAssignments[index];
+}
+function ensureAllScaleAssignments(force=false){
+  progression.forEach((ch,i)=>ensureScaleAssignment(i,force));
+  scaleAssignments=scaleAssignments.slice(0,progression.length);
+}
+function scaleObjectForIndex(index){
+  const ch=progression[index];
+  if(!ch)return null;
+  const a=ensureScaleAssignment(index);
+  const def=scaleById(a.id);
+  const root=a.root==="auto"?ch.root:Number(a.root);
+  const key=parseKeyInput()||{flat:ch.flat,name:noteName(ch.root,ch.flat)};
+  return {
+    ...def,
+    ok:true,
+    root,
+    pcs:def.ints.map(iv=>pc(root+iv)),
+    key,
+    degree:(typeof analyzeFunction==="function"?analyzeFunction(ch,index).label:"Context"),
+    mode:def.name,
+    name:noteName(root,key.flat)+" "+def.name
+  };
+}
+function selectedScaleObject(ch){
+  return scaleObjectForIndex(selected);
+}
+function saveCurrentScaleControls(){
+  if(!progression.length)return;
+  const ch=progression[selected];
+  const id=document.getElementById("scaleSelect").value;
+  const root=document.getElementById("scaleRootSelect").value||"auto";
+  if(id && SCALE_LIBRARY.some(s=>s.id===id)){
+    scaleAssignments[selected]={id,root,symbol:ch.symbol};
+  }
+}
+function populateScaleRoot(){
+  const el=document.getElementById("scaleRootSelect");
+  el.innerHTML='<option value="auto">選択コードのRoot</option>';
+  for(let i=0;i<12;i++){
+    const op=document.createElement("option");
+    op.value=String(i);op.textContent=SHARP[i];
+    el.appendChild(op);
+  }
+}
+function populateScaleCategories(){
+  const cats=["おすすめ",...uniq(SCALE_LIBRARY.map(s=>s.cat)),"All"];
+  const el=document.getElementById("scaleCategory");
+  el.innerHTML="";
+  cats.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;el.appendChild(o)});
+}
+function populateScaleSelect(preserve=true){
+  if(!progression.length)return;
+  const ch=progression[selected];
+  const a=ensureScaleAssignment(selected);
+  const cat=document.getElementById("scaleCategory").value||"おすすめ";
+  const rec=recommendedScaleIds(ch,selected);
+  let list;
+
+  if(cat==="おすすめ"){
+    list=rec.map(id=>scaleById(id));
+    if(!list.some(s=>s.id===a.id)){
+      scaleAssignments[selected]=defaultScaleAssignment(ch,selected);
+    }
+  }else if(cat==="All"){
+    list=SCALE_LIBRARY;
+  }else{
+    list=SCALE_LIBRARY.filter(s=>s.cat===cat);
+    if(!list.some(s=>s.id===a.id) && list.length && !preserve){
+      scaleAssignments[selected]={id:list[0].id,root:a.root,symbol:ch.symbol};
+    }
+  }
+
+  const current=ensureScaleAssignment(selected);
+  const el=document.getElementById("scaleSelect");
+  el.innerHTML="";
+  list.forEach(s=>{
+    const o=document.createElement("option");
+    o.value=s.id;
+    o.textContent=(rec.includes(s.id)?"◎ ":"")+s.name;
+    el.appendChild(o);
+  });
+
+  if(list.some(s=>s.id===current.id)) el.value=current.id;
+  else if(list.length){
+    el.value=list[0].id;
+    scaleAssignments[selected]={id:list[0].id,root:current.root,symbol:ch.symbol};
+  }
+
+  document.getElementById("scaleRootSelect").value=
+    (current.root==="auto"||current.root===undefined)?"auto":String(current.root);
+
+  updateScaleDescription();
+}
+function updateScaleDescription(){
+  if(!progression.length)return;
+  const ch=progression[selected];
+  const s=scaleObjectForIndex(selected);
+  if(!s)return;
+  const rec=recommendedScaleIds(ch,selected).includes(s.id);
+  const rep=scaleRepresentativeChord(s,ch);
+  document.getElementById("scaleDesc").innerHTML=
+    `<strong>${s.name}</strong> ${rec?'<span class="materialBadge">候補</span>':''}`+
+    `<br>${s.use}`+
+    `<br><strong>代表的な対応Chord：</strong> ${rep.symbol}`+
+    `<br><span style="color:#9eb0c7">${rep.note}</span>`+
+    `<br><span style="color:#9eb0c7">構成音：${s.pcs.map(p=>noteName(p,s.key.flat)).join(" ")}</span>`+
+    `<br><span style="color:#9eb0c7">このScaleはコード ${selected+1}：${ch.symbol} に保存されています。</span>`;
+  syncEmbeddedScaleControls();
+}
+function autoAssignAllScales(){
+  ensureAllScaleAssignments(true);
+  document.getElementById("scaleCategory").value="おすすめ";
+  populateScaleSelect(false);
+  renderAll(false);
+  buildReharmPanel();
+  document.getElementById("status").textContent="全コードのScaleを現在のコード内容に合わせて再設定しました。";
+}
+
+function syncEmbeddedScaleControls(){
+  const main=document.getElementById("scaleSelect");
+  if(!main)return;
+
+  ["pianoScaleSelectLocal","guitarScaleSelectLocal"].forEach(id=>{
+    const local=document.getElementById(id);
+    if(!local)return;
+
+    const current=main.value;
+    local.innerHTML="";
+
+    [...main.options].forEach(op=>{
+      const copy=document.createElement("option");
+      copy.value=op.value;
+      copy.textContent=op.textContent;
+      local.appendChild(copy);
+    });
+
+    if([...local.options].some(op=>op.value===current)){
+      local.value=current;
+    }
+  });
+}
+
+function applyEmbeddedScaleSelection(localId){
+  const local=document.getElementById(localId);
+  const main=document.getElementById("scaleSelect");
+  if(!local||!main)return;
+
+  const id=local.value;
+  if(![...main.options].some(op=>op.value===id)){
+    document.getElementById("scaleCategory").value="All";
+    populateScaleSelect(false);
+  }
+
+  main.value=id;
+  saveCurrentScaleControls();
+  updateScaleDescription();
+  renderAll(false);
+  buildReharmPanel();
+}
+
+/* ---------- reactive visuals: show what is sounding ---------- */
+function materialMidiFromPcs(pcs,rootPc,low=55,high=79){
+  const out=[];
+  let first=null;
+  for(let m=low;m<=high;m++){if(pc(m)===rootPc){first=m;break}}
+  if(first===null)first=60;
+  pcs.forEach(p=>{
+    for(let m=first;m<=first+12;m++){
+      if(pc(m)===p){out.push(m);break}
+    }
+  });
+  return uniq(out).sort((a,b)=>a-b);
+}
+
+function drawMaterialScore(ch,notes,title){
+  const v=notes.map((m,i)=>({midi:m,iv:pc(m-ch.root)}));
+  drawScore(ch,v);
+  document.getElementById("scoreText").textContent=title+"："+notes.map(m=>midiName(m,ch.flat)).join(" / ");
+}
+
+function drawMaterialKeyboard(ch,notes,title,scale=null,chordMidis=[]){
+  const chordSet=new Set(chordMidis);
+  const scaleSet=new Set(notes);
+  const markers=[];
+  notes.forEach(m=>{
+    const isChord=chordSet.has(m);
+    const p=pc(m);
+    markers.push({
+      midi:m,label:noteName(p,ch.flat),
+      fill:isChord?colorForPC(p,ch):(p===(scale?.root??ch.root)?"#66a9ff":"#eef2f6"),
+      stroke:isChord?"#07111f":"#667085",strokeWidth:isChord?2:1.2,
+      small:!isChord,textColor:"#07111f"
+    });
+  });
+  renderKeyboardSvg(markers);
+  document.getElementById("pianoText").textContent=title+"："+notes.map(m=>midiName(m,ch.flat)).join(" / ");
+}
+
+function drawGuideFretboard(ch,guidePcs){
+  const shapeObj=guitarShape(ch),shape=shapeObj.frets;
+  const used=shape.filter(f=>f>0);
+  const minF=used.length?Math.max(1,Math.min(...used)-2):1;
+  const maxF=used.length?Math.min(15,Math.max(...used)+3):7;
+  const viewFrets=Math.max(6,maxF-minF+1);
+  const W=1000,H=346,left=95,right=25,top=46,bottom=43;
+  const open=[40,45,50,55,59,64],names=["E","A","D","G","B","E"];
+  const sg=(H-top-bottom)/5,fw=(W-left-right)/viewFrets;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="#fff"/>`;
+  for(let i=0;i<=viewFrets;i++){
+    const x=left+i*fw;
+    if(i<viewFrets)s+=`<text x="${x+fw/2}" y="24" text-anchor="middle" font-family="Arial" font-size="13" fill="#667085">${minF+i}</text>`;
+    s+=`<line x1="${x}" y1="${top-10}" x2="${x}" y2="${H-bottom+10}" stroke="#98a2b3" stroke-width="1.3"/>`;
+  }
+  for(let display=0;display<6;display++){
+    const si=5-display,yy=top+display*sg;
+    s+=`<line x1="${left-48}" y1="${yy}" x2="${W-right}" y2="${yy}" stroke="#344054" stroke-width="${1.2+(5-display)*.22}"/>`;
+    s+=`<text x="24" y="${yy+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#344054">${names[si]}</text>`;
+    for(let fret=minF;fret<=maxF;fret++){
+      const p=pc(open[si]+fret);
+      if(!guidePcs.includes(p))continue;
+      const x=left+(fret-minF+.5)*fw;
+      s+=`<circle cx="${x}" cy="${yy}" r="13" fill="#d8b35e" stroke="#07111f" stroke-width="2"/>`;
+      s+=`<text x="${x}" y="${yy+4}" text-anchor="middle" font-family="Arial" font-size="10" font-weight="800" fill="#07111f">${noteName(p,ch.flat)}</text>`;
+    }
+  }
+  s+=`</svg>`;
+  document.getElementById("fretboard").innerHTML=s;
+  document.getElementById("guitarText").textContent="Guide Tone（3rd / 7th）｜コードフォーム周辺";
+}
+
+function renderGuideMaterial(ch,v){
+  const notes=v.map(x=>x.midi);
+  currentMaterialMode="guide";
+  drawMaterialScore(ch,notes,"Guide Tone");
+  drawMaterialKeyboard(ch,notes,"Guide Tone",null,notes);
+  drawGuideFretboard(ch,uniq(notes.map(pc)));
+}
+
+function renderScaleMaterial(ch,scale,withChord=false){
+  currentMaterialMode=withChord?"chordScale":"scale";
+  const rootMidi=nearestMidiForPc(scale.root,60);
+  const scaleMidis=scale.ints.map(iv=>rootMidi+iv).filter(m=>m<=83);
+  const chordMidis=withChord?pianoVoicing(ch).map(x=>x.midi):[];
+  const all=uniq([...scaleMidis,...chordMidis]).sort((a,b)=>a-b);
+
+  drawMaterialScore(ch,all,withChord?"Chord + Scale":scale.name);
+  drawMaterialKeyboard(ch,all,withChord?"Chord + Scale":scale.name,scale,chordMidis);
+
+  if(withChord){
+    const shape=guitarShape(ch);
+    const scaleObj={...scale,key:parseKeyInput()||{flat:ch.flat}};
+    drawScaleOverlayFretboard(ch,shape,scaleObj);
+    document.getElementById("guitarText").textContent="Chord + "+scale.name+"｜コードフォーム周辺";
+  }else{
+    const scaleObj={...scale,key:parseKeyInput()||{flat:ch.flat}};
+    drawScaleOnlyFretboard(ch,scaleObj);
+    document.getElementById("guitarText").textContent=scale.name+"｜Scale";
+  }
+}
+
+
+function scaleMidiPool(scale,low=52,high=82){
+  const pool=[];
+  for(let m=low;m<=high;m++)if(scale.pcs.includes(pc(m)))pool.push(m);
+  return pool;
+}
+function chordTonePcSet(ch){
+  return new Set(ch.tone.map(iv=>pc(ch.root+iv)));
+}
+function nearestFromList(list,target,predicate=null){
+  const arr=predicate?list.filter(predicate):list;
+  const use=arr.length?arr:list;
+  return use.slice().sort((a,b)=>Math.abs(a-target)-Math.abs(b-target))[0];
+}
+function makeScaleRun(ch,scale,count=8){
+  const rootMidi=nearestMidiForPc(scale.root,60);
+  const raw=[...scale.ints.map(iv=>rootMidi+iv),rootMidi+12];
+  if(raw.length===count)return raw;
+  const out=[];
+  for(let i=0;i<count;i++)out.push(raw[Math.floor(i*(raw.length-1)/Math.max(1,count-1))]);
+  return out;
+}
+function makeScaleSoloLine(ch,scale,count=8,prevMidi=null,index=0){
+  const pool=scaleMidiPool(scale,55,79);
+  if(!pool.length)return [];
+  const chordPcs=chordTonePcSet(ch);
+
+  let current=nearestFromList(
+    pool,
+    prevMidi??64,
+    m=>chordPcs.has(pc(m))
+  );
+  let pos=Math.max(0,pool.indexOf(current));
+  let dir=index%2===0?1:-1;
+  const line=[];
+
+  for(let i=0;i<count;i++){
+    if(i===0 || i===4 || i===count-1){
+      const target=nearestFromList(pool,current,m=>chordPcs.has(pc(m)));
+      current=target; pos=pool.indexOf(current);
+    }else{
+      pos+=dir;
+      if(pos>=pool.length-1){pos=pool.length-1;dir=-1}
+      if(pos<=0){pos=0;dir=1}
+      current=pool[pos];
+    }
+    line.push(current);
+  }
+  return line;
+}
+function drawScaleOverlayFretboardLive(ch,shapeObj,scale,livePc=null){
+  const shape=shapeObj.frets;
+  const used=shape.filter(f=>f>0);
+  let minF=used.length?Math.max(1,Math.min(...used)-2):1;
+  let maxF=used.length?Math.min(15,Math.max(...used)+3):7;
+  if(maxF-minF<5)maxF=Math.min(15,minF+5);
+
+  const viewFrets=Math.max(6,maxF-minF+1);
+  const W=1000,H=346,left=95,right=25,top=46,bottom=43;
+  const open=[40,45,50,55,59,64],names=["E","A","D","G","B","E"];
+  const sg=(H-top-bottom)/5,fw=(W-left-right)/viewFrets;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="#fff"/>`;
+
+  for(let i=0;i<=viewFrets;i++){
+    const fretNumber=minF+i;
+    const x=left+i*fw;
+    if(i<viewFrets)s+=`<text x="${x+fw/2}" y="24" text-anchor="middle" font-family="Arial" font-size="13" fill="#667085">${fretNumber}</text>`;
+    s+=`<line x1="${x}" y1="${top-10}" x2="${x}" y2="${H-bottom+10}" stroke="#98a2b3" stroke-width="1.4"/>`;
+  }
+
+  for(let display=0;display<6;display++){
+    const si=5-display,yy=top+display*sg;
+    s+=`<line x1="${left-48}" y1="${yy}" x2="${W-right}" y2="${yy}" stroke="#344054" stroke-width="${1.2+(5-display)*.22}"/>`;
+    s+=`<text x="24" y="${yy+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#344054">${names[si]}</text>`;
+
+    for(let fret=minF;fret<=maxF;fret++){
+      const p=pc(open[si]+fret);
+      if(!scale.pcs.includes(p))continue;
+      const x=left+(fret-minF+.5)*fw;
+      const isLive=livePc!==null && p===livePc;
+      const isScaleRoot=p===scale.root;
+      s+=`<circle cx="${x}" cy="${yy}" r="${isLive?12:(isScaleRoot?10:8)}" fill="${isLive?"#ffd166":(isScaleRoot?"#b9d8ff":"#f0f2f5")}" stroke="${isLive?"#07111f":"#98a2b3"}" stroke-width="${isLive?2.3:1}"/>`;
+      s+=`<text x="${x}" y="${yy+3.5}" text-anchor="middle" font-family="Arial" font-size="${isLive?9.5:8.5}" font-weight="700" fill="#475467">${noteName(p,scale.key.flat)}</text>`;
+    }
+
+    const fret=shape[si];
+    if(fret>0 && fret>=minF && fret<=maxF){
+      const midi=open[si]+fret,p=pc(midi),x=left+(fret-minF+.5)*fw;
+      s+=`<circle cx="${x}" cy="${yy}" r="15" fill="${colorForPC(p,ch)}" stroke="#07111f" stroke-width="2.2"/>`;
+      s+=`<text x="${x}" y="${yy+4}" text-anchor="middle" font-family="Arial" font-size="10.5" font-weight="800" fill="#07111f">${noteName(p,ch.flat)}</text>`;
+    }
+  }
+  s+=`</svg>`;
+  document.getElementById("fretboard").innerHTML=s;
+}
+function renderLiveChordScaleNote(ch,scale,midi,label="Scale"){
+  const chordMidis=pianoVoicing(ch).map(x=>x.midi);
+  const all=uniq([...chordMidis,midi]).sort((a,b)=>a-b);
+  drawMaterialScore(ch,all,`Chord + ${label}`);
+  drawMaterialKeyboard(ch,all,`Chord + ${label}`,scale,chordMidis);
+  drawScaleOverlayFretboardLive(ch,guitarShape(ch),scale,pc(midi));
+  document.getElementById("guitarText").textContent=
+    `Chord + ${scale.name}｜現在音 ${midiName(midi,scale.key.flat)}`;
+}
+function scheduleLineWithVisuals(ch,scale,line,start,chordDur,label,index){
+  const step=chordDur/Math.max(1,line.length);
+  line.forEach((m,j)=>{
+    playPianoNote(m,start+j*step,Math.min(step*1.55,.6),.25);
+    timers.push(setTimeout(()=>{
+      if(selected!==index)selected=index;
+      renderTabs();renderSummary(ch);populateScaleSelect(true);
+      renderLiveChordScaleNote(ch,scale,m,label);
+      document.getElementById("status").textContent=
+        `${label}｜${ch.symbol}｜${scale.name}｜${midiName(m,scale.key.flat)}`;
+      document.getElementById("nowChord").textContent=ch.symbol+" "+noteName(pc(m),scale.key.flat);
+    },Math.max(0,(start-audioCtx.currentTime+j*step)*1000)));
+  });
+}
+
+
+async function playScaleRepresentativeChord(){
+  try{
+    await ensureAudio();clearPlayback();
+
+    const contextChord=progression[selected];
+    const scale=selectedScaleObject(contextChord);
+    const rep=scaleRepresentativeChord(scale,contextChord);
+    const ch=rep.chord;
+
+    currentMaterialMode="scaleChord";
+    const pv=pianoVoicing(ch);
+    drawScore(ch,pv);
+    drawPianoChordOnly(ch,pv);
+    drawChordFormFretboard(ch,guitarShape(ch));
+
+    const bpm=Number(document.getElementById("bpm").value)||90;
+    const beats=Number(document.getElementById("beats").value)||4;
+    const dur=60/bpm*beats;
+
+    playChord(ch,audioCtx.currentTime+.04,Math.min(dur*.90,3.8));
+    document.getElementById("status").textContent=
+      `${scale.name}｜対応Chord：${rep.symbol}`;
+    document.getElementById("nowChord").textContent=rep.symbol;
+  }catch(e){
+    document.getElementById("error").textContent=e.message;
+  }
+}
+
+/* ---------- scale playback ---------- */
+async function playSelectedScale(withChord=false){
+  try{
+    await ensureAudio();clearPlayback();
+
+    const contextChord=progression[selected];
+    const scale=selectedScaleObject(contextChord);
+    const rep=scaleRepresentativeChord(scale,contextChord);
+    const chordForPlayback=withChord?rep.chord:contextChord;
+
+    renderScaleMaterial(chordForPlayback,scale,withChord);
+
+    const rootMidi=nearestMidiForPc(scale.root,60);
+    const seq=[...scale.ints.map(iv=>rootMidi+iv),rootMidi+12];
+    const bpm=Number(document.getElementById("bpm").value)||90;
+    const step=Math.max(.16,60/bpm/2);
+    const start=audioCtx.currentTime+.06;
+    const total=step*seq.length+.6;
+
+    if(withChord){
+      const cv=pianoVoicing(chordForPlayback);
+      cv.forEach((o,i)=>playPianoNote(o.midi,start,total,i===0?.30:.22));
+    }
+
+    seq.forEach((m,i)=>playPianoNote(m,start+i*step,Math.min(.55,step*1.65),withChord?.24:.38));
+
+    document.getElementById("status").textContent=
+      withChord
+        ? `${scale.name}｜${rep.symbol} + Scale`
+        : `Scale：${scale.name}`;
+    document.getElementById("nowChord").textContent=
+      withChord?rep.symbol:scale.name;
+
+  }catch(e){
+    document.getElementById("error").textContent=e.message;
+  }
+}
+
+/* =========================================================
+   HARMONIC FUNCTION / REHARMONIZATION
+========================================================= */
+const MAJOR_FUNCTIONS=[
+  {deg:"I",func:"Tonic",desc:"調の中心。安定・到着・開始/終了の基準。"},
+  {deg:"ii",func:"Predominant",desc:"Dominantへ進む準備を作る代表的機能。"},
+  {deg:"iii",func:"Tonic family",desc:"Iと共通音を持つTonic系の代理候補。"},
+  {deg:"IV",func:"Predominant",desc:"Dominantへ向かう準備、またはTonicから離れる役割。"},
+  {deg:"V",func:"Dominant",desc:"Tonicへ向かう強い進行感。3rd/7thの解決が重要。"},
+  {deg:"vi",func:"Tonic family",desc:"Iのrelative minorとしてTonic代理に使われることがある。"},
+  {deg:"vii",func:"Dominant family",desc:"Leading-toneを含むDominant系。Major keyの7th chordは通常m7♭5。"}
+];
+
+function chordRootName(p,flat=false){return noteName(p,flat)}
+function makeChord(p,suffix,flat=false){return chordRootName(p,flat)+suffix}
+
+function analyzeFunction(ch,index){
+  const key=parseKeyInput();
+  const next=progression[(index+1)%progression.length];
+  if(!key)return {label:"Context",desc:"Keyを入力すると機能分析できます。"};
+
+  const rel=pc(ch.root-key.root);
+  const degree=MAJOR_DEGREES.indexOf(rel);
+  const q=ch.quality;
+
+  if(degree>=0){
+    const info=MAJOR_FUNCTIONS[degree];
+    return {label:`${info.deg}｜${info.func}`,desc:info.desc};
+  }
+
+  // dominant of next chord
+  if((q==="7"||q==="9"||q==="13") && next && pc(ch.root-next.root)===7){
+    return {label:`V7 of ${next.symbol}`,desc:`次の${next.symbol}へ向かうSecondary Dominantとして解釈可能。Key外でも局所的なDominant機能を作る。`};
+  }
+
+  if((q==="7"||q==="9"||q==="13") && rel===1){
+    return {label:"♭II7｜Tritone Sub candidate",desc:"V7のトライトーンを共有する代理Dominant候補。解決先・メロディー・ベースを確認する。"};
+  }
+
+  if(q==="m7" && rel===5){
+    return {label:"ivm7｜Modal Interchange",desc:"Parallel minorから借用するPredominant colorの代表例。メロディーとの衝突を確認する。"};
+  }
+
+  return {label:"Chromatic / Context",desc:"ダイアトニック外。次のコード、共通音、ベース、声部進行から機能を判断する。"};
+}
+
+function sameFunctionOptions(ch,index){
+  const key=parseKeyInput();
+  if(!key)return [];
+  const rel=pc(ch.root-key.root);
+  const d=MAJOR_DEGREES.indexOf(rel);
+  const flat=key.flat;
+  const roots=MAJOR_DEGREES.map(iv=>pc(key.root+iv));
+  const diatonic=[
+    makeChord(roots[0],"maj7",flat),makeChord(roots[1],"m7",flat),makeChord(roots[2],"m7",flat),
+    makeChord(roots[3],"maj7",flat),makeChord(roots[4],"7",flat),makeChord(roots[5],"m7",flat),
+    makeChord(roots[6],"m7b5",flat)
+  ];
+  const groups={0:[2,5],2:[0,5],5:[0,2],1:[3],3:[1],4:[6],6:[4]};
+  return (groups[d]||[]).map(i=>({
+    symbol:diatonic[i],
+    tag:"同機能代理",
+    desc:`${MAJOR_FUNCTIONS[d]?.func||"同系統"}の役割を保ちながら、共通音やベースの動きを変える候補。`
+  }));
+}
+
+function reharmOptionsFor(index){
+  const ch=progression[index],next=progression[(index+1)%progression.length];
+  const key=parseKeyInput();
+  const flat=key?.flat||ch.flat;
+  const opts=[{symbol:ch.symbol,tag:"Original",desc:"現在のコード。"}];
+
+  sameFunctionOptions(ch,index).forEach(o=>opts.push(o));
+
+  if(next){
+    const secRoot=pc(next.root+7);
+    opts.push({
+      symbol:makeChord(secRoot,"7",flat),
+      tag:"Secondary Dominant",
+      desc:`次の${next.symbol}を一時的なTonicのように見て、そのV7から導く。解決音とメロディーを確認。`
+    });
+
+    const dimRoot=pc(next.root-1);
+    opts.push({
+      symbol:makeChord(dimRoot,"dim7",flat),
+      tag:"Approach dim7",
+      desc:`次の${next.symbol}へ半音下から近づくLeading diminished的な候補。共通音・半音進行を確認。`
+    });
+  }
+
+  if(ch.quality==="7"||ch.quality==="9"||ch.quality==="13"){
+    opts.push({
+      symbol:makeChord(pc(ch.root+6),"7",flat),
+      tag:"Tritone Sub",
+      desc:"元のDominant7と3rd/7thのトライトーンを共有する代理。ベースが半音進行になりやすい。"
+    });
+  }
+
+  if(key){
+    const rel=pc(ch.root-key.root);
+    const degree=MAJOR_DEGREES.indexOf(rel);
+    if(degree===3 || degree===1){
+      opts.push({
+        symbol:makeChord(pc(key.root+5),"m7",flat),
+        tag:"Modal Interchange ivm7",
+        desc:"Parallel minor由来のiv minorをPredominant colorとして使う候補。"
+      });
+    }
+  }
+
+  // de-dupe
+  const seen=new Set();
+  return opts.filter(o=>{const k=o.symbol+"|"+o.tag;if(seen.has(k))return false;seen.add(k);return true});
+}
+
+function buildReharmPanel(){
+  const box=document.getElementById("reharmSlots");
+  if(!box||!progression.length)return;
+  box.innerHTML="";
+  progression.forEach((ch,i)=>{
+    const func=analyzeFunction(ch,i);
+    const opts=reharmOptionsFor(i);
+
+    const card=document.createElement("div");
+    card.className="reharmSlot";
+    card.innerHTML=`
+      <div class="reharmTop">
+        <div><span class="reharmIndex">${i+1}</span> <span class="reharmChord">${ch.symbol}</span></div>
+        <span class="functionBadge">${func.label}</span>
+      </div>
+      <div class="functionText">${func.desc}</div>
+      <div class="functionText"><strong>現在のScale：</strong>${scaleObjectForIndex(i).name}</div>
+      <label class="miniLabel">置き換え候補</label>
+      <select id="reharmSelect${i}"></select>
+      <div class="functionText" id="reharmDesc${i}"></div>
+      <button class="secondary" id="reharmApply${i}">このコードに置き換える</button>
+    `;
+    box.appendChild(card);
+
+    const sel=card.querySelector(`#reharmSelect${i}`);
+    opts.forEach((o,idx)=>{
+      const op=document.createElement("option");
+      op.value=String(idx);op.textContent=`${o.symbol}｜${o.tag}`;
+      sel.appendChild(op);
+    });
+    const update=()=>{const o=opts[Number(sel.value)];card.querySelector(`#reharmDesc${i}`).textContent=o.desc};
+    sel.onchange=update;update();
+    card.querySelector(`#reharmApply${i}`).onclick=()=>{
+      const o=opts[Number(sel.value)];
+      const syms=progression.map(x=>x.symbol);
+      syms[i]=o.symbol;
+      document.getElementById("chords").value=syms.join(",");
+      const parsed=syms.map(parseChord);
+      if(parsed.every(Boolean)){
+        progression=parsed;selected=Math.min(i,progression.length-1);
+        scaleAssignments[i]=null;
+        ensureScaleAssignment(i,true);
+        document.getElementById("scaleCategory").value="おすすめ";
+        populateScaleSelect(false);
+        renderAll(false);buildReharmPanel();
+        document.getElementById("status").textContent=
+          `${ch.symbol} → ${o.symbol}｜${o.tag}｜Scaleも${scaleObjectForIndex(i).name}へ追従`;
+      }
+    };
+  });
+}
+
+function resetReharm(){
+  if(!baseSymbols.length)return;
+  document.getElementById("chords").value=baseSymbols.join(",");
+  progression=baseSymbols.map(parseChord).filter(Boolean);
+  scaleAssignments=[];
+  ensureAllScaleAssignments(true);
+  selected=0;document.getElementById("scaleCategory").value="おすすめ";
+  populateScaleSelect(false);renderAll(false);buildReharmPanel();
+  document.getElementById("status").textContent="基本進行へ戻しました。";
+}
+
+
+/* ---------- Guide Tones ---------- */
+function guideToneIntervals(ch){
+  const thirds=ch.tone.filter(iv=>iv===3||iv===4);
+  const sevenths=ch.tone.filter(iv=>iv===9||iv===10||iv===11);
+  const out=[];
+  if(thirds.length)out.push(thirds[0]);
+  if(sevenths.length)out.push(sevenths[0]);
+  return out;
+}
+function nearestMidiForPc(targetPc,around){
+  let best=null,dist=999;
+  for(let m=48;m<=76;m++){
+    if(pc(m)!==targetPc)continue;
+    const d=Math.abs(m-around);
+    if(d<dist){dist=d;best=m}
+  }
+  return best;
+}
+function guideToneVoicing(ch,prev=null){
+  const ivs=guideToneIntervals(ch);
+  if(!ivs.length)return [];
+  const pcs=ivs.map(iv=>pc(ch.root+iv));
+
+  if(!prev||!prev.length){
+    const anchors=pcs.length===2?[62,67]:[64];
+    return pcs.map((p,i)=>({midi:nearestMidiForPc(p,anchors[i]||64),iv:ivs[i]}))
+              .sort((a,b)=>a.midi-b.midi);
+  }
+
+  const choices=pcs.map(p=>{
+    const arr=[];
+    for(let m=48;m<=76;m++)if(pc(m)===p)arr.push(m);
+    return arr;
+  });
+
+  if(pcs.length===1){
+    let best=choices[0][0],score=999;
+    for(const m of choices[0]){
+      const d=Math.min(...prev.map(x=>Math.abs(m-x.midi)));
+      if(d<score){score=d;best=m}
+    }
+    return [{midi:best,iv:ivs[0]}];
+  }
+
+  let bestPair=null,bestScore=999;
+  for(const a of choices[0]){
+    for(const b of choices[1]){
+      if(a===b)continue;
+      const pair=[a,b].sort((x,y)=>x-y);
+      const pprev=prev.map(x=>x.midi).sort((x,y)=>x-y);
+      const s1=Math.abs(pair[0]-pprev[0])+Math.abs(pair[1]-pprev[Math.min(1,pprev.length-1)]);
+      const s2=Math.abs(pair[0]-pprev[Math.min(1,pprev.length-1)])+Math.abs(pair[1]-pprev[0]);
+      const score=Math.min(s1,s2);
+      if(score<bestScore){bestScore=score;bestPair=pair}
+    }
+  }
+  return (bestPair||[]).map((midi,i)=>({midi,iv:ivs[i]}));
+}
+function playGuideChord(ch,start,dur,prev=null){
+  const v=guideToneVoicing(ch,prev);
+  v.forEach((o,i)=>playPianoNote(o.midi,start,dur,i===0?.48:.44));
+  return v;
+}
+async function playGuideSelected(){
+  try{
+    await ensureAudio(); clearPlayback();
+    const ch=progression[selected];
+    currentMaterialMode="chord";
+    renderAll(false);
+    const bpm=Number(document.getElementById("bpm").value)||90;
+    const beats=Number(document.getElementById("beats").value)||4;
+    const dur=60/bpm*beats;
+    const v=playGuideChord(ch,audioCtx.currentTime+.04,Math.min(dur*.88,3.4));
+    if(v.length)renderGuideMaterial(ch,v);
+    document.getElementById("status").textContent=v.length
+      ? ch.symbol+" ガイドトーン："+v.map(o=>midiName(o.midi,ch.flat)).join(" / ")
+      : ch.symbol+" では3rd/7thを抽出できません。";
+    document.getElementById("nowChord").textContent=ch.symbol+" GT";
+  }catch(e){document.getElementById("error").textContent=e.message}
+}
+async function playGuideProgression(){
+  try{
+    await ensureAudio(); clearPlayback();
+    const bpm=Math.max(40,Math.min(240,Number(document.getElementById("bpm").value)||90));
+    const beats=Math.max(1,Math.min(8,Number(document.getElementById("beats").value)||4));
+    const dur=60/bpm*beats,base=audioCtx.currentTime+.08;
+    let prev=null;
+    progression.forEach((ch,i)=>{
+      const start=base+i*dur;
+      const v=playGuideChord(ch,start,Math.min(dur*.88,3.4),prev);
+      if(v.length)prev=v;
+      timers.push(setTimeout(()=>{
+        selected=i; renderTabs();renderSummary(ch);
+        if(v.length)renderGuideMaterial(ch,v); else renderAll(false);
+        document.getElementById("status").textContent="ガイドトーン再生中："+ch.symbol;
+        document.getElementById("nowChord").textContent=ch.symbol+" GT";
+      },Math.max(0,(start-audioCtx.currentTime)*1000)));
+    });
+    timers.push(setTimeout(()=>{
+      document.getElementById("status").textContent="ガイドトーン進行の再生終了。";
+      document.getElementById("nowChord").textContent="—";
+    },(base-audioCtx.currentTime+progression.length*dur)*1000));
+  }catch(e){document.getElementById("error").textContent=e.message}
+}
+
 /* ---------- Audio ---------- */
 function ensureAudio(){
   const AC=window.AudioContext||window.webkitAudioContext;
@@ -1121,6 +2168,7 @@ async function playSelected(){
     await ensureAudio();
     clearPlayback();
     const ch=progression[selected];
+    renderAll(false);
     const bpm=Number(document.getElementById("bpm").value)||90;
     const beats=Number(document.getElementById("beats").value)||4;
     const dur=60/bpm*beats;
@@ -1134,29 +2182,49 @@ async function playSelected(){
 
 async function playProgression(){
   try{
+    const mode=document.getElementById("progressionSoundMode").value||"chords";
+    progressionSoundMode=mode;
+    if(mode==="guide")return playGuideProgression();
+
     await ensureAudio();
     clearPlayback();
+    ensureAllScaleAssignments(false);
 
     const bpm=Math.max(40,Math.min(240,Number(document.getElementById("bpm").value)||90));
     const beats=Math.max(1,Math.min(8,Number(document.getElementById("beats").value)||4));
     const chordDur=60/bpm*beats;
     const base=audioCtx.currentTime+.08;
     playing=true;
+    let prevSolo=null;
 
     progression.forEach((ch,i)=>{
-      playChord(ch,base+i*chordDur,Math.min(chordDur*.88,3.4));
-      const t=setTimeout(()=>{
-        selected=i;
-        renderAll(false);
-        document.getElementById("status").textContent="再生中："+ch.symbol;
-        document.getElementById("nowChord").textContent=ch.symbol;
-      },Math.max(0,(base-audioCtx.currentTime+i*chordDur)*1000));
-      timers.push(t);
+      const start=base+i*chordDur;
+      playChord(ch,start,Math.min(chordDur*.92,4.0));
+
+      const scale=scaleObjectForIndex(i);
+      let line=[];
+
+      if(mode==="scale"){
+        line=makeScaleRun(ch,scale,8);
+        scheduleLineWithVisuals(ch,scale,line,start,chordDur,"Scale",i);
+      }else if(mode==="solo"){
+        line=makeScaleSoloLine(ch,scale,8,prevSolo,i);
+        if(line.length)prevSolo=line[line.length-1];
+        scheduleLineWithVisuals(ch,scale,line,start,chordDur,"Scale Solo",i);
+      }else{
+        timers.push(setTimeout(()=>{
+          selected=i;
+          renderAll(false);
+          document.getElementById("status").textContent="再生中："+ch.symbol;
+          document.getElementById("nowChord").textContent=ch.symbol;
+        },Math.max(0,(start-audioCtx.currentTime)*1000)));
+      }
     });
 
     timers.push(setTimeout(()=>{
       playing=false;
-      document.getElementById("status").textContent="再生終了。気になるコードを選んで詳しく見てください。";
+      document.getElementById("status").textContent=
+        mode==="chords"?"コード進行の再生終了。":"コード進行＋選択Scaleの再生終了。";
       document.getElementById("nowChord").textContent="—";
     },(base-audioCtx.currentTime+progression.length*chordDur)*1000));
 
@@ -1236,11 +2304,13 @@ function renderTabs(){
   progression.forEach((ch,i)=>{
     const b=document.createElement("button");
     b.className="tab"+(i===selected?" active":"");
-    b.textContent=ch.symbol;
+    b.textContent=ch.symbol+" · "+(scaleObjectForIndex(i)?.name||"");
     b.onclick=()=>{
       selected=i;
+      populateScaleSelect(true);
       renderAll(false);
-      document.getElementById("status").textContent=ch.symbol+" を表示中。";
+      document.getElementById("status").textContent=
+        ch.symbol+"｜"+scaleObjectForIndex(i).name+" を表示中。";
     };
     box.appendChild(b);
   });
@@ -1258,9 +2328,12 @@ function renderSummary(ch){
 
 function renderAll(scroll=false){
   if(!progression.length)return;
+  ensureScaleAssignment(selected);
   const ch=progression[selected];
+  currentMaterialMode="chord";
   renderTabs();
   renderSummary(ch);
+  if(document.getElementById("scaleSelect"))populateScaleSelect(true);
 
   const pv=pianoVoicing(ch);
   drawScore(ch,pv);
@@ -1289,8 +2362,14 @@ function parseProgression(){
 
   document.getElementById("error").textContent="";
   progression=parsed;
+  baseSymbols=[...symbols];
+  scaleAssignments=[];
+  ensureAllScaleAssignments(true);
   selected=0;
+  document.getElementById("scaleCategory").value="おすすめ";
+  populateScaleSelect(false);
   renderAll(false);
+  buildReharmPanel();
   document.getElementById("status").textContent="表示しました。▶進行を再生、またはコードを選んでください。";
   return true;
 }
@@ -1305,14 +2384,59 @@ function makeShareURL(){
   u.searchParams.set("key",document.getElementById("keyInput").value||"C");
   u.searchParams.set("scaleview",scaleViewMode);
   u.searchParams.set("pianoview",pianoViewMode);
+  ensureAllScaleAssignments(false);
+  u.searchParams.set("scales",scaleAssignments.map(a=>`${a.id}@${a.root}`).join(","));
+  u.searchParams.set("pmode",document.getElementById("progressionSoundMode").value||"chords");
   return u.toString();
 }
 
 document.getElementById("applyBtn").onclick=parseProgression;
-document.getElementById("keyInput").addEventListener("change",()=>{ if(progression.length)renderAll(false); });
+document.getElementById("keyInput").addEventListener("change",()=>{ if(progression.length){renderAll(false);buildReharmPanel();} });
 document.getElementById("playOne").onclick=playSelected;
+document.getElementById("playGuideOne").onclick=playGuideSelected;
+document.getElementById("playGuideAll").onclick=playGuideProgression;
 document.getElementById("playAll").onclick=playProgression;
 document.getElementById("stopBtn").onclick=clearPlayback;
+document.getElementById("playScale").onclick=()=>playSelectedScale(false);
+document.getElementById("playScaleChord").onclick=playScaleRepresentativeChord;
+document.getElementById("playChordScale").onclick=()=>playSelectedScale(true);
+document.getElementById("pianoPlayScale").onclick=()=>playSelectedScale(false);
+document.getElementById("pianoPlayScaleChord").onclick=playScaleRepresentativeChord;
+document.getElementById("pianoPlayChordScale").onclick=()=>playSelectedScale(true);
+
+document.getElementById("guitarPlayScale").onclick=()=>playSelectedScale(false);
+document.getElementById("guitarPlayScaleChord").onclick=playScaleRepresentativeChord;
+document.getElementById("guitarPlayChordScale").onclick=()=>playSelectedScale(true);
+
+document.getElementById("pianoScaleSelectLocal").addEventListener("change",()=>{
+  applyEmbeddedScaleSelection("pianoScaleSelectLocal");
+});
+document.getElementById("guitarScaleSelectLocal").addEventListener("change",()=>{
+  applyEmbeddedScaleSelection("guitarScaleSelectLocal");
+});
+
+document.getElementById("resetReharm").onclick=resetReharm;
+document.getElementById("scaleCategory").addEventListener("change",()=>{
+  populateScaleSelect(false);
+  saveCurrentScaleControls();
+  renderAll(false);
+  buildReharmPanel();
+});
+document.getElementById("scaleSelect").addEventListener("change",()=>{
+  saveCurrentScaleControls();
+  updateScaleDescription();
+  renderAll(false);
+  buildReharmPanel();
+});
+document.getElementById("scaleRootSelect").addEventListener("change",()=>{
+  saveCurrentScaleControls();
+  updateScaleDescription();
+  renderAll(false);
+  buildReharmPanel();
+});
+document.getElementById("autoAssignScales").onclick=autoAssignAllScales;
+document.getElementById("progressionSoundMode").addEventListener("change",e=>{progressionSoundMode=e.target.value});
+
 document.getElementById("stickyPlay").onclick=playProgression;
 document.getElementById("stickyStop").onclick=clearPlayback;
 
@@ -1346,7 +2470,30 @@ updateGuitarModeButtons();
 updateScaleModeButtons();
 updatePianoModeButtons();
 
+populateScaleCategories();
+populateScaleRoot();
 parseProgression();
+
+if(qs.get("scales")){
+  const parts=qs.get("scales").split(",");
+  parts.forEach((part,i)=>{
+    if(!progression[i])return;
+    const [id,root="auto"]=part.split("@");
+    if(SCALE_LIBRARY.some(x=>x.id===id)){
+      scaleAssignments[i]={id,root,symbol:progression[i].symbol};
+    }
+  });
+}
+if(["chords","scale","solo","guide"].includes(qs.get("pmode"))){
+  progressionSoundMode=qs.get("pmode");
+  document.getElementById("progressionSoundMode").value=progressionSoundMode;
+}
+
+populateScaleSelect(true);
+renderAll(false);
+buildReharmPanel();
+updateScaleDescription();
+syncEmbeddedScaleControls();
 </script>
 </body>
 </html>
