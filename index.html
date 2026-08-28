@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TLJ Chord Lab v10</title>
+<title>TLJ Lab v12 FINAL</title>
 <style>
 :root{
   --bg:#07111f;--panel:#0e1c2f;--panel2:#091524;--text:#f5f7fb;--muted:#9eb0c7;
@@ -165,15 +165,50 @@ select{
   .embeddedScaleAudition .auditionRow{grid-template-columns:1fr 1fr}
   .embeddedScaleAudition select{grid-column:1/-1}
 }
+
+.viewBar{
+  position:sticky;top:0;z-index:20;background:rgba(7,17,31,.96);
+  backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;
+  padding:10px;margin:12px 0 14px
+}
+.viewBarGrid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.viewBar label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.audioUnlock{white-space:nowrap}
+.audioState{font-size:12px;color:var(--muted);margin-top:7px}
+.viewSection.hiddenSection{display:none!important}
+.sectionHint{font-size:12px;color:var(--muted);margin-top:4px}
+@media(max-width:700px){
+  .viewBarGrid{grid-template-columns:1fr}
+  .audioUnlock{width:100%}
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">THINK LIKE JAZZ</div>
-  <h1>TLJ Chord Lab v10</h1>
-  <p class="lead">コード・ガイドトーン・選択Scale・リハーモナイズを、<strong>聴く → 見る → 比較する → 置き換える</strong>まで1ページで確認します。</p>
+  <h1>TLJ Lab v12</h1>
+  <p class="lead">コード・ガイドトーン・選択Scale・リハーモナイズを、<strong>聴く → 見る → 比較する → 置き換える</strong>まで確認します。</p>
 
-  <div class="card">
+  <div class="viewBar">
+    <div class="viewBarGrid">
+      <div>
+        <label for="viewSelect">表示する画面</label>
+        <select id="viewSelect">
+          <option value="progression">コード進行</option>
+          <option value="scale">Scale Library</option>
+          <option value="score">五線譜</option>
+          <option value="piano">ピアノ鍵盤</option>
+          <option value="guitar">ギター指板</option>
+          <option value="reharm">Reharmonize</option>
+        </select>
+      </div>
+      <button id="audioUnlockBtn" class="audioUnlock">🔊 音声を有効化</button>
+    </div>
+    <div class="audioState" id="audioState">最初に「音声を有効化」を1回タップしてください。Mizou内で鳴らない場合はSafari / Chromeで開いてください。</div>
+  </div>
+
+  <div class="card viewSection" id="viewProgression">
     <div class="controls">
       <input id="chords" value="Cmaj7,Dm9,G13,Cmaj7" aria-label="コード進行">
       <button id="applyBtn">表示</button>
@@ -232,57 +267,57 @@ select{
     <div class="error" id="error"></div>
   </div>
 
-  <div class="card">
-    <div class="sectionTitle">🎧 Sound & Scale</div>
-    <p class="sub">選択したScaleには代表的な対応Chordを表示・再生します。鳴らしている素材に五線譜・鍵盤・ギター指板も追従します。対応Chordは唯一の正解ではなく、Key・機能・メロディー・スタイルで判断してください。</p>
+  <div class="card viewSection" id="viewScale">
+    <div class="sectionTitle">🎧 Scale Library</div>
+    <p class="sub">Scaleは CORE → JAZZ → ADVANCED の3段階。コード名だけで唯一のScaleを決めず、機能・解決先・メロディーを確認して選びます。</p>
 
-    <div class="labGrid">
-      <div class="scalePanel">
-        <h3>Jazz Scale Library</h3>
+    <div class="scalePanel">
+      <h3>Jazz Scale Library</h3>
 
-        <label class="miniLabel" for="scaleCategory">カテゴリ</label>
-        <select id="scaleCategory"></select>
+      <label class="miniLabel" for="scaleCategory">カテゴリ</label>
+      <select id="scaleCategory"></select>
 
-        <label class="miniLabel" for="scaleSelect">Scale</label>
-        <select id="scaleSelect"></select>
+      <label class="miniLabel" for="scaleSelect">Scale</label>
+      <select id="scaleSelect"></select>
 
-        <label class="miniLabel" for="scaleRootSelect">Scale Root</label>
-        <select id="scaleRootSelect"></select>
+      <label class="miniLabel" for="scaleRootSelect">Scale Root</label>
+      <select id="scaleRootSelect"></select>
 
-        <div class="scaleDesc" id="scaleDesc"></div>
+      <div class="scaleDesc" id="scaleDesc"></div>
 
-        <div class="actionRow">
-          <button id="playScale" class="secondary">▶ Scale</button>
-          <button id="playScaleChord" class="secondary">▶ 対応Chord</button>
-          <button id="playChordScale">▶ 対応Chord + Scale</button>
-          <button id="autoAssignScales" class="secondary">↻ 全コードをおすすめScaleへ</button>
-        </div>
-      </div>
-
-      <div class="reharmPanel">
-        <h3>Reharmonize</h3>
-        <div class="functionText">
-          各コードの機能を確認しながら、1コードずつ置き換えます。候補は「唯一の正解」ではありません。メロディー、ベース、声部進行、目的を聴いて判断してください。
-        </div>
-        <div class="actionRow">
-          <button id="resetReharm" class="secondary">↩ 基本進行へ戻す</button>
-        </div>
+      <div class="actionRow">
+        <button id="playScale" class="secondary">▶ Scale</button>
+        <button id="playScaleChord" class="secondary">▶ Chord Example</button>
+        <button id="playChordScale">▶ Chord Example + Scale</button>
+        <button id="autoAssignScales" class="secondary">↻ 全コードをおすすめScaleへ</button>
       </div>
     </div>
+  </div>
 
+  <div class="card viewSection" id="viewReharm">
+    <div class="sectionTitle">♻ Reharmonize</div>
+    <p class="sub">コードごとに機能を確認しながら、1つずつ置き換えます。</p>
+    <div class="reharmPanel">
+      <div class="functionText">
+        候補は唯一の正解ではありません。メロディー、ベース、声部進行、目的を聴いて判断してください。
+      </div>
+      <div class="actionRow">
+        <button id="resetReharm" class="secondary">↩ 基本進行へ戻す</button>
+      </div>
+    </div>
     <div class="reharmSlots" id="reharmSlots"></div>
   </div>
 
-  <div class="card">
+  <div class="card viewSection" id="viewScore">
     <div class="sectionTitle">🎼 五線譜</div>
     <p class="sub">鍵盤・再生と同じ参考ボイシングを表示。下の音名も同じMIDI音から生成しています。</p>
     <div class="visualWrap" id="score"></div>
     <div class="detailText" id="scoreText"></div>
   </div>
 
-  <div class="card">
+  <div class="card viewSection" id="viewPiano">
     <div class="sectionTitle">🎹 ピアノ鍵盤</div>
-    <p class="sub">コード・ボイシングと対応Scaleを同じ鍵盤で確認し、この画面からScale／対応Chord／Chord+Scaleを直接試聴できます。</p>
+    <p class="sub">コード・ボイシングと対応Scaleを同じ鍵盤で確認し、この画面からScale／Chord Example／Chord+Scaleを直接試聴できます。</p>
 
     <div class="pianoModes" id="pianoModes">
       <button class="pianoModeBtn active" data-piano-mode="chord">コードフォーム</button>
@@ -300,7 +335,7 @@ select{
       <div class="auditionRow">
         <select id="pianoScaleSelectLocal" aria-label="ピアノ用対応スケール"></select>
         <button id="pianoPlayScale" class="secondary">▶ Scale</button>
-        <button id="pianoPlayScaleChord" class="secondary">▶ 対応Chord</button>
+        <button id="pianoPlayScaleChord" class="secondary">▶ Chord Example</button>
         <button id="pianoPlayChordScale">▶ Chord + Scale</button>
       </div>
     </div>
@@ -309,9 +344,9 @@ select{
     <div class="detailText" id="pianoText"></div>
   </div>
 
-  <div class="card">
+  <div class="card viewSection" id="viewGuitar">
     <div class="sectionTitle">🎸 ギター指板</div>
-    <p class="sub">Standard Tuning／開放弦なし。コードフォームと対応Scaleを結び付け、この画面からScale／対応Chord／Chord+Scaleを直接試聴できます。</p>
+    <p class="sub">Standard Tuning／開放弦なし。コードフォームと対応Scaleを結び付け、この画面からScale／Chord Example／Chord+Scaleを直接試聴できます。</p>
 
     <div class="guitarModes" id="guitarModes">
       <button class="guitarModeBtn active" data-mode="general">一般フォーム</button>
@@ -339,7 +374,7 @@ select{
       <div class="auditionRow">
         <select id="guitarScaleSelectLocal" aria-label="ギター用対応スケール"></select>
         <button id="guitarPlayScale" class="secondary">▶ Scale</button>
-        <button id="guitarPlayScaleChord" class="secondary">▶ 対応Chord</button>
+        <button id="guitarPlayScaleChord" class="secondary">▶ Chord Example</button>
         <button id="guitarPlayChordScale">▶ Chord + Scale</button>
       </div>
     </div>
@@ -348,19 +383,6 @@ select{
     <div class="detailText" id="guitarText"></div>
   </div>
 
-  <div class="card">
-    <div class="sectionTitle">理解のポイント</div>
-    <div class="learnGrid">
-      <div class="learnBox">
-        <strong>見る</strong>
-        <span class="note">Root・Chord Tone・Tensionが、五線譜／鍵盤／指板で同じ色になります。</span>
-      </div>
-      <div class="learnBox">
-        <strong>聴く</strong>
-        <span class="note">「このコード」と「進行全体」を同じページで聴き比べられます。</span>
-      </div>
-    </div>
-  </div>
 
   <div class="stickyPlayer">
     <div class="stickyRow">
@@ -1335,7 +1357,7 @@ function scaleRepresentativeChord(scale,currentChord){
   return {
     chord:parsed||currentChord,
     symbol:rootName+suffix,
-    note:"Jazz Scale Libraryの代表的な対応コード例。唯一の正解ではなく、実際は機能・メロディー・ボイシングで選択します。"
+    note:"このScaleの響きを確認するための代表的なChord Exampleです。唯一の正解ではなく、機能・解決先・メロディー・ボイシングで選択します。"
   };
 }
 
@@ -1426,11 +1448,34 @@ function populateScaleRoot(){
     el.appendChild(op);
   }
 }
+
+const SCALE_TIERS={
+  CORE:["ionian","dorian","phrygian","lydian","mixolydian","aeolian","locrian"],
+  JAZZ:[
+    "jazzminor","lydiandom","altered","locriannat2",
+    "halfwhole","wholehalf","whole",
+    "majorpent","minorpent","dominantpent","blues"
+  ]
+};
+function scaleTier(id){
+  if(SCALE_TIERS.CORE.includes(id))return "CORE";
+  if(SCALE_TIERS.JAZZ.includes(id))return "JAZZ";
+  return "ADVANCED";
+}
+
 function populateScaleCategories(){
-  const cats=["おすすめ",...uniq(SCALE_LIBRARY.map(s=>s.cat)),"All"];
+  const cats=["おすすめ","CORE","JAZZ","ADVANCED","All"];
   const el=document.getElementById("scaleCategory");
   el.innerHTML="";
-  cats.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;el.appendChild(o)});
+  cats.forEach(c=>{
+    const o=document.createElement("option");
+    o.value=c;
+    o.textContent=
+      c==="CORE"?"CORE｜基本7 Modes":
+      c==="JAZZ"?"JAZZ｜実践Jazz Scale":
+      c==="ADVANCED"?"ADVANCED｜発展Scale":c;
+    el.appendChild(o);
+  });
 }
 function populateScaleSelect(preserve=true){
   if(!progression.length)return;
@@ -1448,7 +1493,7 @@ function populateScaleSelect(preserve=true){
   }else if(cat==="All"){
     list=SCALE_LIBRARY;
   }else{
-    list=SCALE_LIBRARY.filter(s=>s.cat===cat);
+    list=SCALE_LIBRARY.filter(s=>scaleTier(s.id)===cat);
     if(!list.some(s=>s.id===a.id) && list.length && !preserve){
       scaleAssignments[selected]={id:list[0].id,root:a.root,symbol:ch.symbol};
     }
@@ -1483,9 +1528,9 @@ function updateScaleDescription(){
   const rec=recommendedScaleIds(ch,selected).includes(s.id);
   const rep=scaleRepresentativeChord(s,ch);
   document.getElementById("scaleDesc").innerHTML=
-    `<strong>${s.name}</strong> ${rec?'<span class="materialBadge">候補</span>':''}`+
+    `<strong>${s.name}</strong> <span class="materialBadge">${scaleTier(s.id)}</span> ${rec?'<span class="materialBadge">候補</span>':''}`+
     `<br>${s.use}`+
-    `<br><strong>代表的な対応Chord：</strong> ${rep.symbol}`+
+    `<br><strong>このScaleを試せるChord例：</strong> ${rep.symbol}`+
     `<br><span style="color:#9eb0c7">${rep.note}</span>`+
     `<br><span style="color:#9eb0c7">構成音：${s.pcs.map(p=>noteName(p,s.key.flat)).join(" ")}</span>`+
     `<br><span style="color:#9eb0c7">このScaleはコード ${selected+1}：${ch.symbol} に保存されています。</span>`;
@@ -1783,7 +1828,7 @@ async function playScaleRepresentativeChord(){
 
     playChord(ch,audioCtx.currentTime+.04,Math.min(dur*.90,3.8));
     document.getElementById("status").textContent=
-      `${scale.name}｜対応Chord：${rep.symbol}`;
+      `${scale.name}｜Chord Example：${rep.symbol}`;
     document.getElementById("nowChord").textContent=rep.symbol;
   }catch(e){
     document.getElementById("error").textContent=e.message;
@@ -2112,13 +2157,89 @@ async function playGuideProgression(){
   }catch(e){document.getElementById("error").textContent=e.message}
 }
 
+
+/* ---------- View selector ---------- */
+const VIEW_IDS={
+  progression:"viewProgression",
+  scale:"viewScale",
+  score:"viewScore",
+  piano:"viewPiano",
+  guitar:"viewGuitar",
+  reharm:"viewReharm"
+};
+let currentView="progression";
+
+function setView(v,scroll=true){
+  currentView=v;
+  const sections=[...document.querySelectorAll(".viewSection")];
+  sections.forEach(el=>el.classList.add("hiddenSection"));
+  const id=VIEW_IDS[v];
+  if(id)document.getElementById(id)?.classList.remove("hiddenSection");
+  const sel=document.getElementById("viewSelect");
+  if(sel)sel.value=v;
+  if(scroll){
+    document.getElementById(VIEW_IDS[v])?.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+}
+
 /* ---------- Audio ---------- */
-function ensureAudio(){
-  const AC=window.AudioContext||window.webkitAudioContext;
-  if(!AC)throw new Error("このブラウザはWeb Audioに対応していません。");
-  if(!audioCtx)audioCtx=new AC();
-  if(audioCtx.state==="suspended")return audioCtx.resume();
-  return Promise.resolve();
+let audioUnlocked=false;
+let warmupAudio=null;
+
+async function unlockAudio(){
+  const state=document.getElementById("audioState");
+  try{
+    // 1) Unlock HTMLMediaElement path (helps iOS/in-app browsers)
+    if(!warmupAudio){
+      warmupAudio=new Audio("data:audio/wav;base64,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");
+      warmupAudio.preload="auto";
+      warmupAudio.playsInline=true;
+    }
+    try{
+      warmupAudio.currentTime=0;
+      await warmupAudio.play();
+    }catch(_e){}
+
+    // 2) Unlock Web Audio path
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)throw new Error("このブラウザはWeb Audioに対応していません。");
+    if(!audioCtx)audioCtx=new AC({latencyHint:"interactive"});
+    if(audioCtx.state!=="running")await audioCtx.resume();
+
+    // Play a very short audible warm-up tone in the same user gesture.
+    const osc=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    osc.type="sine";
+    osc.frequency.value=440;
+    g.gain.setValueAtTime(.0001,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.025,audioCtx.currentTime+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.08);
+    osc.connect(g);g.connect(audioCtx.destination);
+    osc.start();osc.stop(audioCtx.currentTime+.09);
+
+    audioUnlocked=audioCtx.state==="running";
+    if(audioUnlocked){
+      state.textContent="音声ON。コード・Scale・進行を再生できます。";
+      document.getElementById("audioUnlockBtn").textContent="🔊 音声ON";
+      return true;
+    }
+    throw new Error("音声エンジンを開始できませんでした。");
+  }catch(e){
+    audioUnlocked=false;
+    state.textContent="音声を開始できません。Mizou内ブラウザで鳴らない場合は、このTLJ LabをSafari / Chromeで開いてください。";
+    document.getElementById("error").textContent=e.message;
+    return false;
+  }
+}
+
+async function ensureAudio(){
+  if(!audioUnlocked){
+    const ok=await unlockAudio();
+    if(!ok)throw new Error("「音声を有効化」をタップするか、Safari / Chromeで開いてください。");
+  }
+  if(audioCtx && audioCtx.state==="suspended")await audioCtx.resume();
+  if(!audioCtx || audioCtx.state!=="running")throw new Error("音声エンジンが停止しています。もう一度「音声を有効化」をタップしてください。");
+  return audioCtx;
 }
 
 function midiFreq(m){return 440*Math.pow(2,(m-69)/12)}
@@ -2387,6 +2508,7 @@ function makeShareURL(){
   ensureAllScaleAssignments(false);
   u.searchParams.set("scales",scaleAssignments.map(a=>`${a.id}@${a.root}`).join(","));
   u.searchParams.set("pmode",document.getElementById("progressionSoundMode").value||"chords");
+  u.searchParams.set("view",VIEW_IDS[currentView]?currentView:"progression");
   return u.toString();
 }
 
@@ -2397,6 +2519,9 @@ document.getElementById("playGuideOne").onclick=playGuideSelected;
 document.getElementById("playGuideAll").onclick=playGuideProgression;
 document.getElementById("playAll").onclick=playProgression;
 document.getElementById("stopBtn").onclick=clearPlayback;
+document.getElementById("audioUnlockBtn").onclick=unlockAudio;
+document.getElementById("viewSelect").addEventListener("change",e=>setView(e.target.value,true));
+
 document.getElementById("playScale").onclick=()=>playSelectedScale(false);
 document.getElementById("playScaleChord").onclick=playScaleRepresentativeChord;
 document.getElementById("playChordScale").onclick=()=>playSelectedScale(true);
@@ -2488,12 +2613,24 @@ if(["chords","scale","solo","guide"].includes(qs.get("pmode"))){
   progressionSoundMode=qs.get("pmode");
   document.getElementById("progressionSoundMode").value=progressionSoundMode;
 }
+if(["progression","scale","score","piano","guitar","reharm"].includes(qs.get("view"))){
+  currentView=qs.get("view");
+}
+setView(currentView,false);
 
 populateScaleSelect(true);
 renderAll(false);
 buildReharmPanel();
 updateScaleDescription();
 syncEmbeddedScaleControls();
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible" && audioCtx && audioCtx.state!=="running"){
+    document.getElementById("audioState").textContent="音声が停止しました。「音声を有効化」を再タップしてください。";
+    document.getElementById("audioUnlockBtn").textContent="🔊 音声を有効化";
+    audioUnlocked=false;
+  }
+});
 </script>
 </body>
 </html>
