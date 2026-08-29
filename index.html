@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TLJ Lab v12 FINAL</title>
+<title>TLJ Lab v13 Mizou Bridge</title>
 <style>
 :root{
   --bg:#07111f;--panel:#0e1c2f;--panel2:#091524;--text:#f5f7fb;--muted:#9eb0c7;
@@ -182,12 +182,67 @@ select{
   .audioUnlock{width:100%}
 }
 
+
+/* ---------- Mizou Bridge / External Full View ---------- */
+.bridgeBar{
+  display:flex;gap:8px;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+  background:rgba(7,17,31,.98);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:14px;
+  padding:9px 10px;margin:0 0 10px;
+}
+.bridgeBar .bridgeText{font-size:12px;color:var(--muted);line-height:1.35}
+.bridgeActions{display:flex;gap:8px;flex-wrap:wrap}
+.bridgeActions button{width:auto;margin:0;padding:9px 12px;white-space:nowrap}
+#backCoachBtn{display:none}
+body.fullLab #backCoachBtn{display:inline-block}
+body.mizouEmbed .brand,
+body.mizouEmbed h1,
+body.mizouEmbed .lead{display:none!important}
+body.mizouEmbed .wrap{max-width:none;padding:6px}
+body.mizouEmbed .bridgeBar{
+  border-radius:10px;margin:0 0 6px;padding:7px 8px
+}
+body.mizouEmbed .bridgeText{display:none}
+body.mizouEmbed .viewBar{
+  position:static;margin:0 0 6px;padding:7px;border-radius:10px
+}
+body.mizouEmbed .viewBarGrid{grid-template-columns:minmax(0,1fr) auto}
+body.mizouEmbed .viewBar label{display:none}
+body.mizouEmbed .audioState{display:none}
+body.mizouEmbed .card{
+  margin:0;padding:10px;border-radius:10px
+}
+body.mizouEmbed .sectionTitle{font-size:16px}
+body.mizouEmbed .sub{font-size:12px;margin-bottom:8px}
+body.mizouEmbed .summary{margin:6px 0}
+body.mizouEmbed .controls,
+body.mizouEmbed .smallgrid{gap:6px}
+body.mizouEmbed button{padding:8px 10px}
+body.mizouEmbed input,
+body.mizouEmbed select{padding:8px 9px}
+@media(max-width:760px){
+  .bridgeBar{align-items:stretch;flex-direction:column}
+  .bridgeActions{display:grid;grid-template-columns:1fr}
+  .bridgeActions button{width:100%}
+  body.mizouEmbed .viewBarGrid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="bridgeBar" id="bridgeBar">
+    <div class="bridgeText" id="bridgeText">
+      Mizouではプレビュー、TLJ Labは別タブで大きく使えます。
+    </div>
+    <div class="bridgeActions">
+      <button id="openFullBtn">↗ TLJ Labを全画面で開く</button>
+      <button id="backCoachBtn" class="secondary">← Practice Coachへ戻る</button>
+    </div>
+  </div>
   <div class="brand">THINK LIKE JAZZ</div>
-  <h1>TLJ Lab v12</h1>
+  <h1>TLJ Lab v13</h1>
   <p class="lead">コード・ガイドトーン・選択Scale・リハーモナイズを、<strong>聴く → 見る → 比較する → 置き換える</strong>まで確認します。</p>
 
   <div class="viewBar">
@@ -205,7 +260,7 @@ select{
       </div>
       <button id="audioUnlockBtn" class="audioUnlock">🔊 音声を有効化</button>
     </div>
-    <div class="audioState" id="audioState">最初に「音声を有効化」を1回タップしてください。Mizou内で鳴らない場合はSafari / Chromeで開いてください。</div>
+    <div class="audioState" id="audioState">最初に「音声を有効化」を1回タップしてください。Mizou内で狭い・音が出ない場合は「全画面でTLJ Labを開く」を使用してください。</div>
   </div>
 
   <div class="card viewSection" id="viewProgression">
@@ -2158,6 +2213,72 @@ async function playGuideProgression(){
 }
 
 
+
+/* ---------- Mizou <-> TLJ Lab bridge ---------- */
+const TLJ_EMBEDDED = (window.self !== window.top) || new URLSearchParams(location.search).get("embed")==="1";
+
+function fullLabURL(){
+  const u=new URL(location.href);
+  u.searchParams.delete("embed");
+  u.searchParams.set("full","1");
+  return u.toString();
+}
+
+function openTLJFull(){
+  const u=fullLabURL();
+  // Called from a user click, so browsers normally allow a new tab/window.
+  const w=window.open(u,"TLJ_LAB_FULL");
+  if(!w){
+    // Popup blocked: navigate the current top-level context instead when possible.
+    try{
+      window.top.location.href=u;
+    }catch(_e){
+      location.href=u;
+    }
+  }
+}
+
+function returnToPracticeCoach(){
+  // Full Lab was opened from the compact Lab by user click.
+  // Closing this tab naturally reveals the Mizou tab underneath.
+  try{
+    if(window.opener && !window.opener.closed){
+      try{ window.opener.focus(); }catch(_e){}
+      window.close();
+      return;
+    }
+  }catch(_e){}
+  // If not script-opened, use browser history where possible.
+  if(history.length>1){
+    history.back();
+  }else{
+    document.getElementById("status").textContent="Mizouのタブへ戻ってください。";
+  }
+}
+
+function applyBridgeMode(){
+  document.body.classList.toggle("mizouEmbed",TLJ_EMBEDDED);
+  document.body.classList.toggle("fullLab",!TLJ_EMBEDDED);
+
+  const openBtn=document.getElementById("openFullBtn");
+  const backBtn=document.getElementById("backCoachBtn");
+  const bridgeText=document.getElementById("bridgeText");
+
+  if(TLJ_EMBEDDED){
+    openBtn.textContent="↗ 全画面でTLJ Labを開く";
+    if(bridgeText)bridgeText.textContent="Mizou内はミニ表示です。全画面では別タブで開きます。";
+    // Compact Mizou view: keep only the requested view.
+    const qv=new URLSearchParams(location.search).get("view");
+    if(["progression","scale","score","piano","guitar","reharm"].includes(qv)){
+      currentView=qv;
+    }
+  }else{
+    openBtn.style.display="none";
+    backBtn.style.display="inline-block";
+    if(bridgeText)bridgeText.textContent="TLJ Lab｜大きな画面で音・譜面・鍵盤・指板を確認";
+  }
+}
+
 /* ---------- View selector ---------- */
 const VIEW_IDS={
   progression:"viewProgression",
@@ -2509,6 +2630,8 @@ function makeShareURL(){
   u.searchParams.set("scales",scaleAssignments.map(a=>`${a.id}@${a.root}`).join(","));
   u.searchParams.set("pmode",document.getElementById("progressionSoundMode").value||"chords");
   u.searchParams.set("view",VIEW_IDS[currentView]?currentView:"progression");
+  u.searchParams.delete("embed");
+  u.searchParams.set("full","1");
   return u.toString();
 }
 
@@ -2521,6 +2644,8 @@ document.getElementById("playAll").onclick=playProgression;
 document.getElementById("stopBtn").onclick=clearPlayback;
 document.getElementById("audioUnlockBtn").onclick=unlockAudio;
 document.getElementById("viewSelect").addEventListener("change",e=>setView(e.target.value,true));
+document.getElementById("openFullBtn").onclick=openTLJFull;
+document.getElementById("backCoachBtn").onclick=returnToPracticeCoach;
 
 document.getElementById("playScale").onclick=()=>playSelectedScale(false);
 document.getElementById("playScaleChord").onclick=playScaleRepresentativeChord;
@@ -2616,6 +2741,7 @@ if(["chords","scale","solo","guide"].includes(qs.get("pmode"))){
 if(["progression","scale","score","piano","guitar","reharm"].includes(qs.get("view"))){
   currentView=qs.get("view");
 }
+applyBridgeMode();
 setView(currentView,false);
 
 populateScaleSelect(true);
